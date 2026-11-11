@@ -2,7 +2,7 @@ from collections.abc import Iterator
 
 from openai import OpenAI
 
-from app.llm.base import LLMProvider
+from app.llm.base import LLMProvider, LLMResult
 
 
 class OpenAIProvider(LLMProvider):
@@ -12,13 +12,18 @@ class OpenAIProvider(LLMProvider):
         self.client = OpenAI(api_key=api_key, base_url=base_url)
         self.model = model
 
-    def chat(self, system: str, messages: list[dict], temperature: float = 0.2) -> str:
+    def complete(self, system: str, messages: list[dict], temperature: float = 0.2) -> LLMResult:
         resp = self.client.chat.completions.create(
             model=self.model,
             temperature=temperature,
             messages=[{"role": "system", "content": system}, *messages],
         )
-        return resp.choices[0].message.content or ""
+        usage = resp.usage
+        return LLMResult(
+            text=resp.choices[0].message.content or "",
+            input_tokens=usage.prompt_tokens if usage else 0,
+            output_tokens=usage.completion_tokens if usage else 0,
+        )
 
     def stream(self, system: str, messages: list[dict]) -> Iterator[str]:
         stream = self.client.chat.completions.create(

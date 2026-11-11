@@ -2,7 +2,7 @@ from collections.abc import Iterator
 
 import anthropic
 
-from app.llm.base import LLMProvider
+from app.llm.base import LLMProvider, LLMResult
 
 
 class ClaudeProvider(LLMProvider):
@@ -13,8 +13,7 @@ class ClaudeProvider(LLMProvider):
         self.model = model
         self.max_tokens = max_tokens
 
-    def chat(self, system: str, messages: list[dict], temperature: float = 0.2) -> str:
-        # Claude takes the system prompt as its own field, and max_tokens is required
+    def complete(self, system: str, messages: list[dict], temperature: float = 0.2) -> LLMResult:
         resp = self.client.messages.create(
             model=self.model,
             max_tokens=self.max_tokens,
@@ -22,7 +21,11 @@ class ClaudeProvider(LLMProvider):
             system=system,
             messages=messages,
         )
-        return "".join(block.text for block in resp.content if block.type == "text")
+        return LLMResult(
+            text="".join(block.text for block in resp.content if block.type == "text"),
+            input_tokens=resp.usage.input_tokens,
+            output_tokens=resp.usage.output_tokens,
+        )
 
     def stream(self, system: str, messages: list[dict]) -> Iterator[str]:
         with self.client.messages.stream(
