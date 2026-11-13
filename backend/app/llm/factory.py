@@ -20,6 +20,8 @@ def get_llm(provider: str | None = None) -> LLMProvider:
     if name == "claude":
         if not settings.ANTHROPIC_API_KEY:
             raise ValueError("ANTHROPIC_API_KEY is missing in .env")
-        return ClaudeProvider(settings.ANTHROPIC_API_KEY, settings.CLAUDE_MODEL)
+        return ClaudeProvider(
+            settings.ANTHROPIC_API_KEY, settings.CLAUDE_MODEL, settings.CLAUDE_EFFORT
+        )
 
     raise ValueError(f"Unknown LLM provider '{name}'. Use one of: {', '.join(SUPPORTED)}")

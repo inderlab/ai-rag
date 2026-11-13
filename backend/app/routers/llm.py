@@ -6,9 +6,13 @@ from pydantic import BaseModel, Field
 
 from app.config import settings
 from app.llm.base import LLMProvider, LLMResult
+from app.llm.claude_provider import ClaudeProvider
 from app.llm.factory import SUPPORTED, get_llm
+from app.llm.openai_provider import OpenAIProvider
 
 router = APIRouter(prefix="/llm", tags=["llm"])
+
+PROVIDER_CLASSES = {"openai": OpenAIProvider, "claude": ClaudeProvider}
 
 DEFAULT_SYSTEM = "You are a helpful teacher. Answer in Hinglish. Keep answers short."
 
@@ -23,6 +27,7 @@ class ProviderInfo(BaseModel):
     model: str
     configured: bool
     default: bool
+    supports_temperature: bool
 
 
 class LLMTestRequest(BaseModel):
@@ -72,6 +77,7 @@ class TemperatureResponse(BaseModel):
     prompt: str
     results: list[TemperatureRun]
     identical_by_temperature: dict[str, bool]
+    temperature_supported: bool
 
 
 def resolve(provider: str | None) -> LLMProvider:
@@ -102,6 +108,7 @@ def list_providers() -> list[ProviderInfo]:
             model=models[name],
             configured=bool(keys[name]),
             default=name == settings.LLM_PROVIDER.lower(),
+            supports_temperature=PROVIDER_CLASSES[name].supports_temperature,
         )
         for name in SUPPORTED
     ]
@@ -169,4 +176,5 @@ def compare_temperature(body: TemperatureRequest) -> TemperatureResponse:
         prompt=body.prompt,
         results=results,
         identical_by_temperature=identical,
+        temperature_supported=llm.supports_temperature,
     )

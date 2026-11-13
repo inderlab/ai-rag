@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import health, llm, transcript
+from app.routers import health, llm, prompting, transcript
 
 app = FastAPI(title=settings.APP_NAME, version="0.1.0")
 
@@ -16,4 +16,5 @@ app.add_middleware(
 
 app.include_router(health.router, prefix="/api")
 app.include_router(llm.router, prefix="/api")
+app.include_router(prompting.router, prefix="/api")
 app.include_router(transcript.router, prefix="/api")

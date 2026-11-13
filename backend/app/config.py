@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     OPENAI_MODEL: str = "gpt-4o-mini"
     ANTHROPIC_API_KEY: str = ""
     CLAUDE_MODEL: str = "claude-haiku-5-5"
+    CLAUDE_EFFORT: str = "low"
 
     @property
     def cors_origins(self) -> list[str]:

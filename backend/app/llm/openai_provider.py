@@ -25,10 +25,11 @@ class OpenAIProvider(LLMProvider):
             output_tokens=usage.completion_tokens if usage else 0,
         )
 
-    def stream(self, system: str, messages: list[dict]) -> Iterator[str]:
+    def stream(self, system: str, messages: list[dict], temperature: float = 0.2) -> Iterator[str]:
         stream = self.client.chat.completions.create(
             model=self.model,
             stream=True,
+            temperature=temperature,
             messages=[{"role": "system", "content": system}, *messages],
         )
         for chunk in stream:

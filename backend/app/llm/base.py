@@ -13,6 +13,7 @@ class LLMResult:
 class LLMProvider(ABC):
     name: str
     model: str
+    supports_temperature: bool = True
 
     @abstractmethod
     def complete(
@@ -23,4 +24,6 @@ class LLMProvider(ABC):
         return self.complete(system, messages, temperature).text
 
     @abstractmethod
-    def stream(self, system: str, messages: list[dict]) -> Iterator[str]: ...
+    def stream(
+        self, system: str, messages: list[dict], temperature: float = 0.2
+    ) -> Iterator[str]: ...

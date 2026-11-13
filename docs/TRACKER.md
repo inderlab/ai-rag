@@ -8,8 +8,8 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 | Day | Date | Topic (learn) | Build (project) | Status | Commits | Hours |
 |---|---|---|---|---|---|---|
 | 0 | 2026-11-10 | Setup | Folder structure, FastAPI + Vite skeleton, docs | ✅ | 1 | |
-| 1 | | LLM basics + API | Health, config, LLM test call | 🔄 | | |
-| 2 | | Prompting + providers | OpenAI + Claude provider layer, streaming | ⬜ | | |
+| 1 | 2026-11-11 | LLM basics + API | Health, config, LLM test call, chat, temperature compare | ✅ | 1 | |
+| 2 | 2026-11-12 | Prompting + providers | Streaming (SSE), provider compare, prompt styles | 🔄 | | |
 | 3 | | Transcript + Whisper | YouTube captions, Video table, background job | ⬜ | | |
 | 4 | | Embeddings | `embedder.py` with multilingual-e5-small | ⬜ | | |
 | 5 | | Chunking | `chunker.py` + tests | ⬜ | | |
