@@ -28,7 +28,10 @@ def ask_openai(temperature: float) -> None:
     r = client.chat.completions.create(
         model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
         temperature=temperature,
-        messages=[{"role": "system", "content": SYSTEM}, {"role": "user", "content": QUESTION}],
+        messages=[
+            {"role": "system", "content": SYSTEM},
+            {"role": "user", "content": QUESTION},
+        ],
     )
     ms = int((time.perf_counter() - t0) * 1000)
     print(f"\n[openai | temp={temperature} | {ms} ms | tokens={r.usage.total_tokens}]")

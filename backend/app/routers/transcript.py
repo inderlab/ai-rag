@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from app.ingestion.youtube import extract_video_id, fetch_transcript, fmt_ts
+from app.ingestion.youtube import extract_video_id, fetch_transcript, fmt_ts, friendly_error
 
 router = APIRouter(tags=["transcript"])
 
@@ -30,8 +30,8 @@ def get_transcript(
 
     try:
         segments = fetch_transcript(video_id)
-    except Exception as e:  # no captions, private video, blocked request
-        raise HTTPException(status_code=404, detail=f"Could not get captions: {e}") from e
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=friendly_error(e)) from e
 
     return TranscriptResponse(
         video_id=video_id,

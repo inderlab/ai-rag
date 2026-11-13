@@ -1,10 +1,13 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+BACKEND_DIR = Path(__file__).resolve().parents[1]
+
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=BACKEND_DIR / ".env", extra="ignore")
 
     APP_NAME: str = "VidMind AI"
     ENV: str = "dev"
@@ -16,6 +19,8 @@ class Settings(BaseSettings):
     ANTHROPIC_API_KEY: str = ""
     CLAUDE_MODEL: str = "claude-haiku-5-5"
     CLAUDE_EFFORT: str = "low"
+
+    DATABASE_URL: str = f"sqlite:///{BACKEND_DIR / 'data' / 'vidmind.db'}"
 
     @property
     def cors_origins(self) -> list[str]:

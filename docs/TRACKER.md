@@ -9,8 +9,8 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 |---|---|---|---|---|---|---|
 | 0 | 2026-11-10 | Setup | Folder structure, FastAPI + Vite skeleton, docs | ✅ | 1 | |
 | 1 | 2026-11-11 | LLM basics + API | Health, config, LLM test call, chat, temperature compare | ✅ | 1 | |
-| 2 | 2026-11-12 | Prompting + providers | Streaming (SSE), provider compare, prompt styles | 🔄 | | |
-| 3 | | Transcript + Whisper | YouTube captions, Video table, background job | ⬜ | | |
+| 2 | 2026-11-12 | Prompting + providers | Streaming (SSE), provider compare, prompt styles | ✅ | 1 | |
+| 3 | 2026-11-13 | Transcript + Whisper | YouTube captions, Video + Segment tables, background job, `/api/videos` | ✅ | 1 | |
 | 4 | | Embeddings | `embedder.py` with multilingual-e5-small | ⬜ | | |
 | 5 | | Chunking | `chunker.py` + tests | ⬜ | | |
 | 6 | | Vector DB (ChromaDB) | `chroma_store.py`, indexing pipeline, `/api/search` | ⬜ | | |

@@ -27,9 +27,13 @@ def provider_compare(names: list[str]) -> None:
     for name in names:
         llm = get_llm(name)
         start = time.perf_counter()
-        r = llm.complete("You are a friendly teacher.", [{"role": "user", "content": QUESTION}])
+        r = llm.complete(
+            "You are a friendly teacher.", [{"role": "user", "content": QUESTION}]
+        )
         ms = int((time.perf_counter() - start) * 1000)
-        print(f"\n[{name} | {llm.model} | {ms} ms | in={r.input_tokens} out={r.output_tokens}]")
+        print(
+            f"\n[{name} | {llm.model} | {ms} ms | in={r.input_tokens} out={r.output_tokens}]"
+        )
         print(r.text)
 
 
@@ -53,7 +57,9 @@ def streaming(name: str) -> None:
     llm = get_llm(name)
     start = time.perf_counter()
     first = None
-    for token in llm.stream("You are a friendly teacher.", [{"role": "user", "content": QUESTION}]):
+    for token in llm.stream(
+        "You are a friendly teacher.", [{"role": "user", "content": QUESTION}]
+    ):
         if first is None:
             first = int((time.perf_counter() - start) * 1000)
         print(token, end="", flush=True)
