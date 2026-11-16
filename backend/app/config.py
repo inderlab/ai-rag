@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     CLAUDE_MODEL: str = "claude-haiku-5-5"
     CLAUDE_EFFORT: str = "low"
 
+    EMBEDDING_MODEL: str = "intfloat/multilingual-e5-small"
+    EMBEDDING_BATCH_SIZE: int = 32
+
     DATABASE_URL: str = f"sqlite:///{BACKEND_DIR / 'data' / 'vidmind.db'}"
 
     @property

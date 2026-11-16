@@ -8,13 +8,14 @@ openai>=1.40
 anthropic>=0.40
 youtube-transcript-api>=1.0
 sqlalchemy>=2.0
+sentence-transformers>=3.0
 
 # dev
 pytest>=8.0
 ruff>=0.6
 
 # added later in the plan:
-# chromadb, sentence-transformers  (Day 4-6)
+# chromadb  (Day 6)
 # python-jose, passlib[bcrypt]  (auth)
 # langgraph  (Day 9)
 # faster-whisper  (uploads)
