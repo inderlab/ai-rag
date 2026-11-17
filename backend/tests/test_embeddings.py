@@ -117,22 +117,48 @@ def test_embed_rejects_too_many_texts(client):
     assert client.post("/api/embeddings", json={"texts": ["a"] * 65}).status_code == 422
 
 
-def test_semantic_search_on_video_uses_cache(client, fake_model):
+def test_semantic_search_on_segments_uses_cache(client, fake_model):
     video_id = client.post("/api/videos", json={"url": "dQw4w9WgXcQ"}).json()["id"]
 
     first = client.post(
-        f"/api/videos/{video_id}/semantic-search", json={"q": "database url", "k": 2}
+        f"/api/videos/{video_id}/semantic-search",
+        json={"q": "database url", "k": 2, "unit": "segment"},
     )
     data = first.json()
+    assert data["unit"] == "segment"
     assert data["cached"] is False
-    assert data["segments_embedded"] == 3
+    assert data["items_embedded"] == 3
     assert data["results"][0]["timestamp"] == "04:12"
     assert data["results"][0]["keyword_match"] is True
     assert len(data["results"]) == 2
 
-    second = client.post(f"/api/videos/{video_id}/semantic-search", json={"q": "spring boot"})
+    second = client.post(
+        f"/api/videos/{video_id}/semantic-search", json={"q": "spring boot", "unit": "segment"}
+    )
     assert second.json()["cached"] is True
     assert second.json()["results"][0]["timestamp"] == "00:00"
+
+
+def test_semantic_search_on_chunks_by_default(client):
+    video_id = client.post("/api/videos", json={"url": "dQw4w9WgXcQ"}).json()["id"]
+    r = client.post(
+        f"/api/videos/{video_id}/semantic-search",
+        json={"q": "database url", "max_words": 10, "overlap_words": 0},
+    )
+    data = r.json()
+    assert data["unit"] == "chunk"
+    assert data["items_embedded"] == 2
+    assert data["results"][0]["text"] == "welcome to spring boot set database url in properties"
+    assert data["results"][0]["end_timestamp"] == "04:20"
+
+
+def test_semantic_search_rejects_big_overlap(client):
+    video_id = client.post("/api/videos", json={"url": "dQw4w9WgXcQ"}).json()["id"]
+    r = client.post(
+        f"/api/videos/{video_id}/semantic-search",
+        json={"q": "database", "max_words": 10, "overlap_words": 10},
+    )
+    assert r.status_code == 422
 
 
 def test_semantic_search_unknown_video_is_404(client):

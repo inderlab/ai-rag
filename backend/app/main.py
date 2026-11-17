@@ -8,7 +8,7 @@ from sqlalchemy import update
 from app import db
 from app.config import settings
 from app.models import Video, VideoStatus, init_db
-from app.routers import embeddings, health, llm, prompting, transcript, videos
+from app.routers import chunks, embeddings, health, llm, prompting, transcript, videos
 
 
 def recover_interrupted_jobs() -> None:
@@ -44,3 +44,4 @@ app.include_router(prompting.router, prefix="/api")
 app.include_router(transcript.router, prefix="/api")
 app.include_router(videos.router, prefix="/api")
 app.include_router(embeddings.router, prefix="/api")
+app.include_router(chunks.router, prefix="/api")

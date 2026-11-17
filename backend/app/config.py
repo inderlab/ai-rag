@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL: str = "intfloat/multilingual-e5-small"
     EMBEDDING_BATCH_SIZE: int = 32
 
+    CHUNK_MAX_WORDS: int = 300
+    CHUNK_OVERLAP_WORDS: int = 50
+
     DATABASE_URL: str = f"sqlite:///{BACKEND_DIR / 'data' / 'vidmind.db'}"
 
     @property

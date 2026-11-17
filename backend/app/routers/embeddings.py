@@ -2,11 +2,10 @@ import math
 import threading
 import time
 from collections import OrderedDict
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -14,14 +13,14 @@ from app.db import get_db
 from app.ingestion import embedder
 from app.ingestion.embedder import Kind
 from app.ingestion.youtube import fmt_ts
-from app.models import TranscriptSegment, Video, VideoStatus
+from app.services.transcripts import load_segments, ready_video, video_chunks
 
 router = APIRouter(tags=["embeddings"])
 
 DbSession = Annotated[Session, Depends(get_db)]
 
 CACHE_SIZE = 5
-_cache: OrderedDict[tuple[int, str], list[list[float]]] = OrderedDict()
+_cache: OrderedDict[tuple, list[list[float]]] = OrderedDict()
 _cache_lock = threading.Lock()
 
 
@@ -84,15 +83,22 @@ class SimilarityResponse(BaseModel):
     results: list[ScoredPassage]
 
 
+Unit = Literal["chunk", "segment"]
+
+
 class SemanticSearchRequest(BaseModel):
     q: str = Field(min_length=2, max_length=300)
     k: int = Field(5, ge=1, le=20)
+    unit: Unit = "chunk"
+    max_words: int = Field(settings.CHUNK_MAX_WORDS, ge=10, le=2000)
+    overlap_words: int = Field(settings.CHUNK_OVERLAP_WORDS, ge=0)
 
 
 class SegmentHit(BaseModel):
     rank: int
     position: int
     timestamp: str
+    end_timestamp: str
     text: str
     score: float
     keyword_match: bool
@@ -101,7 +107,8 @@ class SegmentHit(BaseModel):
 class SemanticSearchResponse(BaseModel):
     video_id: int
     q: str
-    segments_embedded: int
+    unit: Unit
+    items_embedded: int
     cached: bool
     latency_ms: int
     results: list[SegmentHit]
@@ -114,8 +121,7 @@ def model_or_503() -> embedder.EmbeddingModel:
         raise HTTPException(status_code=503, detail=f"Embedding model failed to load: {e}") from e
 
 
-def segment_vectors(video: Video, texts: list[str]) -> tuple[list[list[float]], bool]:
-    key = (video.id, video.updated_at.isoformat())
+def cached_vectors(key: tuple, texts: list[str]) -> tuple[list[list[float]], bool]:
     with _cache_lock:
         if key in _cache:
             _cache.move_to_end(key)
@@ -187,24 +193,28 @@ def similarity(body: SimilarityRequest) -> SimilarityResponse:
 def semantic_search(
     video_id: int, body: SemanticSearchRequest, session: DbSession
 ) -> SemanticSearchResponse:
-    video = session.get(Video, video_id)
-    if video is None:
-        raise HTTPException(status_code=404, detail="Video not found")
-    if video.status != VideoStatus.READY:
-        raise HTTPException(
-            status_code=409, detail=f"Transcript not ready, video status is '{video.status}'"
-        )
+    video = ready_video(session, video_id)
+    if body.overlap_words >= body.max_words:
+        raise HTTPException(status_code=422, detail="overlap_words must be smaller than max_words")
     model_or_503()
 
-    segments = list(
-        session.scalars(
-            select(TranscriptSegment)
-            .where(TranscriptSegment.video_id == video.id)
-            .order_by(TranscriptSegment.position)
+    if body.unit == "chunk":
+        chunks = video_chunks(session, video, body.max_words, body.overlap_words)
+        items = [(c.position, c.start, c.end, c.text) for c in chunks]
+        key: tuple = (
+            video.id,
+            video.updated_at.isoformat(),
+            "chunk",
+            body.max_words,
+            body.overlap_words,
         )
-    )
+    else:
+        segments = load_segments(session, video)
+        items = [(s.position, s.start, s.end, s.text) for s in segments]
+        key = (video.id, video.updated_at.isoformat(), "segment")
+
     start = time.perf_counter()
-    vectors, cached = segment_vectors(video, [s.text for s in segments])
+    vectors, cached = cached_vectors(key, [text for *_, text in items])
     q = embedder.embed_query(body.q)
     scored = sorted(
         ((i, embedder.cosine(q, v)) for i, v in enumerate(vectors)),
@@ -217,17 +227,19 @@ def semantic_search(
     return SemanticSearchResponse(
         video_id=video.id,
         q=body.q,
-        segments_embedded=len(segments),
+        unit=body.unit,
+        items_embedded=len(items),
         cached=cached,
         latency_ms=latency,
         results=[
             SegmentHit(
                 rank=r,
-                position=segments[i].position,
-                timestamp=fmt_ts(segments[i].start),
-                text=segments[i].text,
+                position=items[i][0],
+                timestamp=fmt_ts(items[i][1]),
+                end_timestamp=fmt_ts(items[i][2]),
+                text=items[i][3],
                 score=round(score, 4),
-                keyword_match=any(w in segments[i].text.lower() for w in words),
+                keyword_match=any(w in items[i][3].lower() for w in words),
             )
             for r, (i, score) in enumerate(scored, start=1)
         ],

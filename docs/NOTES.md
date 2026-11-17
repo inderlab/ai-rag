@@ -37,7 +37,13 @@ Write each concept in my own words after learning it. If I can't explain it here
 - Pehli search 606 ms (61 segments embed hue), cached search 18 ms. Har sawaal pe saare segments embed karna slow hai, isliye Day 6 mein vector DB mein pehle se save karenge.
 
 ## Day 5 — Chunking
--
+- Chunk: lambe transcript ka chhota tukda jo ek baar mein embed hota hai. Poora transcript ek vector mein daalo to saare topics mix ho jaate hain. Har line alag rakho to context nahi bachta.
+- Mera chunker poore segments jodta hai jab tak `max_words` (default 300) na ho jaaye, taaki sentence beech mein na kate. Bahut lamba segment mile to use words mein todta hai aur time baraabar baant deta hai.
+- Overlap: agla chunk pichle chunk ke aakhri ~50 words (poore segments) se shuru hota hai. Jo baat do chunks ki seema pe hai, wo kisi ek chunk mein poori mil jaati hai.
+- Metadata: har chunk ke saath `start`, `end`, `first_segment`, `last_segment`. Isi se jawab mein `[mm:ss]` timestamp dikhega (Day 7).
+- My test (`learn/day05_chunking.py`, 487 words ka video): 100 words = 6 chunks, 300 = 2 chunks, 800 = 1 chunk. Size badha to chunks kam, par har chunk ka matlab dhundhla.
+- My test (semantic search, 100 words + 20 overlap): Hinglish "main tumhe kabhi dhokha nahi dunga" ab chorus wala chunk ("never gonna ... hurt you") laaya. Segments pe ye galat lines laata tha. 61 segments embed karne mein 920 ms, 6 chunks mein 395 ms.
+- Rule of thumb: video ke liye 250-400 words + 10-20% overlap. Asli size eval se tay hoga (Day 13).
 
 ## Day 6 — Vector DB
 - Vector DB vs SQL:
@@ -51,8 +57,10 @@ Write each concept in my own words after learning it. If I can't explain it here
 
 ## Interview answers (practice)
 1. Why ChromaDB?
-2. Why chunk overlap?
+2. Why chunk overlap? Chunk ki seema pe koi baat aadhi ek chunk mein aur aadhi agle mein chali jaati hai. Overlap se wo baat kam se kam ek chunk mein poori rehti hai. Kharcha: thoda zyada storage aur embedding.
 3. How did I reduce hallucinations?
 4. Keyword search vs semantic search? Keyword search exact shabd dhoondta hai ("database" likha hai to milega). Semantic search matlab dhoondta hai ("DB connect" ≈ "datasource URL set karo"). Best result dono ko milake milta hai (hybrid search).
 5. Embedding model kaise chunoge? Language support (Hindi chahiye to multilingual), dimension (size vs quality), speed, cost (local free vs API), aur apne data pe test karke.
 6. Model badal diya to kya karna padega? Saara data dobara embed karna padega, kyunki purane aur naye vectors compare nahi ho sakte.
+7. Chunk size ka search pe asar? Chhote chunks = exact match par context kam, LLM ko adhoora jawab. Bade chunks = context zyada par ek vector mein kai topics, ranking dhundhli aur prompt mein tokens zyada. Isliye beech ka size aur eval se tune.
+8. Chunking ke tareeke? Fixed size (words/tokens), sentence/segment boundary pe, recursive (paragraph → sentence → word), semantic (matlab badle wahan todo). Video ke liye segment boundary + time metadata best hai.

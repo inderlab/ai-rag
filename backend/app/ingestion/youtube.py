@@ -103,8 +103,12 @@ def friendly_error(e: Exception) -> str:
     for cls, message in FRIENDLY_ERRORS.items():
         if isinstance(e, cls):
             return message
-    first_line = str(e).strip().splitlines()[0] if str(e).strip() else type(e).__name__
-    return first_line[:300]
+    lines = [line.strip() for line in str(e).splitlines() if line.strip()]
+    if not lines:
+        return type(e).__name__
+    if len(lines) > 1 and lines[0].endswith("caused by:"):
+        return lines[1][:300]
+    return lines[0][:300]
 
 
 def fmt_ts(seconds: float) -> str:

@@ -12,7 +12,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 | 2 | 2026-11-12 | Prompting + providers | Streaming (SSE), provider compare, prompt styles | ✅ | 1 | |
 | 3 | 2026-11-13 | Transcript + Whisper | YouTube captions, Video + Segment tables, background job, `/api/videos` | ✅ | 1 | |
 | 4 | 2026-11-16 | Embeddings | `embedder.py` (multilingual-e5-small, 384 dim), `/api/embeddings`, similarity, semantic search on a video | ✅ | 1 | |
-| 5 | | Chunking | `chunker.py` + tests | ⬜ | | |
+| 5 | 2026-11-17 | Chunking | `chunker.py` (segment-aware, overlap, timestamps), `/api/chunks/preview`, `/api/videos/{id}/chunks`, compare sizes, chunk search | ✅ | 1 | |
 | 6 | | Vector DB (ChromaDB) | `chroma_store.py`, indexing pipeline, `/api/search` | ⬜ | | |
 | 7 | | RAG | `/api/chat` with `[mm:ss]` citations | ⬜ | | |
 | 8 | | Structured outputs + tools | Title, summary, chapters, tags | ⬜ | | |
@@ -57,6 +57,13 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 - **Problems / how I solved them:** model download ~470 MB and first load ~35 s, so it loads lazily on first use; tests use a fake model so they run without downloading
 - **Result:** Hinglish query matched English + Hindi DB sentences; on a real video first search 606 ms, cached 18 ms
 - **Tomorrow:** Day 5 — chunking (segments are too short for good search)
+
+### Day 5 — 2026-11-17
+- **Learned:** chunk size trade-off, overlap, metadata (start/end), segment-aware vs fixed word chunking
+- **Built:** `app/ingestion/chunker.py`, `app/services/transcripts.py`, `/api/chunks/preview`, `/api/videos/{id}/chunks`, `/api/videos/{id}/chunks/compare`, `unit: chunk|segment` in semantic search (chunk is default)
+- **Problems / how I solved them:** YouTube gave a temporary 502 and the saved error only showed "most likely caused by:", so `friendly_error` now shows the real cause line; retry worked
+- **Result:** 487-word video → 6 / 2 / 1 chunks for 100 / 300 / 800 words; Hinglish query now finds the right chorus chunk; embedding 6 chunks 395 ms vs 61 segments 920 ms
+- **Tomorrow:** Day 6 — ChromaDB, save chunk vectors once instead of embedding on every search
 
 ---
 
