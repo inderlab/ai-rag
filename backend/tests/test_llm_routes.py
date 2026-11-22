@@ -25,6 +25,9 @@ class FakeLLM(LLMProvider):
     def stream(self, system: str, messages: list[dict]) -> Iterator[str]:
         yield "x"
 
+    def structured(self, system, messages, schema, temperature=0.2):
+        raise NotImplementedError
+
 
 @pytest.fixture
 def fake(monkeypatch):

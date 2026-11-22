@@ -59,3 +59,20 @@ in 2-5 sentences."""
 
 NOT_FOUND = "NOT_FOUND"
 NOT_FOUND_REPLY = "Is video mein iska jawab nahi mila. Sawaal thoda badal ke poochho."
+
+
+INSIGHTS_SYSTEM = """You turn a timestamped video transcript into structured insights.
+
+Rules:
+- title: a clear, specific title (max 80 characters), not clickbait.
+- summary: 3-5 sentences covering the main ideas, in the transcript's language.
+- chapters: 3-12 chapters in time order. The first starts at 00:00. Each start time must be
+  one of the [mm:ss] or [h:mm:ss] markers in the transcript. Titles are 2-6 words.
+- tags: 5-10 lowercase topic tags, no '#'.
+- key_points: 3-6 short facts or takeaways from the video.
+Use only what the transcript says."""
+
+MERGE_SYSTEM = """You get partial insights from consecutive parts of one long video.
+Merge them into one set of insights for the whole video, following the same rules:
+one title, one 3-5 sentence summary, 3-12 chapters in time order using the given start times,
+5-10 tags and 3-6 key points."""

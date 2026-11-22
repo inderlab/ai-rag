@@ -2,7 +2,7 @@ from collections.abc import Iterator
 
 from openai import OpenAI
 
-from app.llm.base import LLMProvider, LLMResult
+from app.llm.base import LLMProvider, LLMResult, StructuredResult, T
 
 
 class OpenAIProvider(LLMProvider):
@@ -35,3 +35,22 @@ class OpenAIProvider(LLMProvider):
         for chunk in stream:
             if chunk.choices and chunk.choices[0].delta.content:
                 yield chunk.choices[0].delta.content
+
+    def structured(
+        self, system: str, messages: list[dict], schema: type[T], temperature: float = 0.2
+    ) -> StructuredResult[T]:
+        resp = self.client.chat.completions.parse(
+            model=self.model,
+            temperature=temperature,
+            response_format=schema,
+            messages=[{"role": "system", "content": system}, *messages],
+        )
+        message = resp.choices[0].message
+        if message.refusal or message.parsed is None:
+            raise ValueError(f"OpenAI did not return {schema.__name__}: {message.refusal}")
+        usage = resp.usage
+        return StructuredResult(
+            data=message.parsed,
+            input_tokens=usage.prompt_tokens if usage else 0,
+            output_tokens=usage.completion_tokens if usage else 0,
+        )

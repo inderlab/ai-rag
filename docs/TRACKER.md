@@ -15,7 +15,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 | 5 | 2026-11-17 | Chunking | `chunker.py` (segment-aware, overlap, timestamps), `/api/chunks/preview`, `/api/videos/{id}/chunks`, compare sizes, chunk search | ✅ | 1 | |
 | 6 | 2026-11-22 | Vector DB (ChromaDB) | `chroma_store.py`, indexing pipeline (`indexing` status), `/api/search`, `/api/vectorstore/info`, reindex | ✅ | 1 | |
 | 7 | 2026-11-22 | RAG | `/api/chat` with `[mm:ss]` citations, `/api/chat/compare` (with vs without RAG) | ✅ | 1 | |
-| 8 | | Structured outputs + tools | Title, summary, chapters, tags | ⬜ | | |
+| 8 | 2026-11-22 | Structured outputs + tools | `structured()` in both providers, VideoInsights (title, summary, chapters, tags, key points), `/api/videos/{id}/insights`, tool-calling practice | ✅ | 1 | |
 | 9 | | Agents + LangGraph | Router + retriever + answer graph | ⬜ | | |
 | 10 | | Multi-agent + verifier | All agents, verifier loop, SSE | ⬜ | | |
 | 11 | | React + Vite | Library, video page, chat, quiz, model dropdown | ⬜ | | |
@@ -78,6 +78,13 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 - **Problems / how I solved them:** one compare call returned 502 without a reason in the log; chat routes now log the real exception
 - **Result:** 10 questions on a real 1 hour talk: 9 answered with correct timestamps, out-of-video question → NOT_FOUND
 - **Tomorrow:** Day 8 — structured outputs (title, summary, chapters, tags) and tool calling
+
+### Day 8 — 2026-11-22
+- **Learned:** structured outputs (Pydantic schema), tool calling loop, `tool_result`, parallel tool calls, strict tools, forced tool_choice not allowed on newer Claude models
+- **Built:** `LLMProvider.structured()` (Claude `messages.parse`, OpenAI `chat.completions.parse`), `app/services/insights.py` (30 s markers, map-reduce for long videos, cleanup), `video_insights` table, auto insights after indexing, `GET/POST /api/videos/{id}/insights`, `learn/day08_tools.py`
+- **Problems / how I solved them:** chapters only matched chunk starts (2 chapters for a 3 min song); now the transcript has a marker every ~30 s
+- **Result:** 14 sensible chapters for the 1 hour talk, 7 for the song; tool demo shows 1 call, 2 parallel calls, and no call when not needed
+- **Tomorrow:** Day 9 — LangGraph basics: router + retriever + answer graph
 
 ---
 

@@ -2,7 +2,7 @@ import hashlib
 import math
 from collections.abc import Iterator
 
-from app.llm.base import LLMProvider, LLMResult
+from app.llm.base import LLMProvider, LLMResult, StructuredResult
 
 DIM = 64
 
@@ -32,6 +32,7 @@ class FakeLLM(LLMProvider):
 
     def __init__(self, replies: list[str] | None = None):
         self.replies = list(replies or [])
+        self.structured_replies: list[dict] = []
         self.calls: list[dict] = []
 
     def complete(self, system: str, messages: list[dict], temperature: float = 0.2) -> LLMResult:
@@ -43,3 +44,8 @@ class FakeLLM(LLMProvider):
         text = self.complete(system, messages, temperature).text
         for word in text.split(" "):
             yield word + " "
+
+    def structured(self, system, messages, schema, temperature=0.2):
+        self.calls.append({"system": system, "messages": messages, "schema": schema.__name__})
+        data = self.structured_replies.pop(0)
+        return StructuredResult(data=schema(**data), input_tokens=500, output_tokens=80)

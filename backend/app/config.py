@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     CHROMA_COLLECTION: str = "vidmind_chunks"
     SEARCH_K: int = 6
 
+    AUTO_INSIGHTS: bool = True
+    INSIGHTS_MAX_WORDS: int = 40000
+
     DATABASE_URL: str = f"sqlite:///{BACKEND_DIR / 'data' / 'vidmind.db'}"
 
     @property

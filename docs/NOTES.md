@@ -66,6 +66,17 @@ Write each concept in my own words after learning it. If I can't explain it here
 - Cost: har RAG sawaal ~3000 input tokens (6 chunks × ~300 words) + 150-400 output. Retrieval ~250-450 ms, LLM ~1-3 s.
 - `/api/chat/compare` dono jawab ek saath deta hai, interview demo ke liye.
 
+## Day 8 — Structured outputs + tool calling
+- Structured output: LLM se pakka JSON, Pydantic schema ke hisaab se. Claude: `client.messages.parse(output_format=Schema)` (andar `output_config.format` json_schema). OpenAI: `chat.completions.parse(response_format=Schema)`. Dono `llm.structured(system, messages, Schema)` ke peeche, routes ko farak nahi padta.
+- Naye Claude models pe forced `tool_choice` (type `tool`/`any`) kai models pe 400 deta hai, isliye JSON ke liye structured outputs hi sahi raasta hai. Tools ke liye `strict: true` + `additionalProperties: false`.
+- Tool calling: model sirf bolta hai "get_weather({city: Delhi}) chalao". Tool **mera code** chalata hai, result `tool_result` mein wapas jaata hai, model phir jawab likhta hai. Loop tab tak jab tak `stop_reason != "tool_use"`.
+- My test (`learn/day08_tools.py`): "Delhi ka mausam" → 1 tool call. "Mumbai aur Shimla mein kahan thand" → ek hi step mein 2 parallel tool calls, phir sahi comparison. "Paris" → tool nahi chalaya, mana kiya. "2+2" → tool ki zaroorat hi nahi.
+- VideoInsights (title, summary, chapters, tags, key_points) indexing ke baad apne aap banta hai (`AUTO_INSIGHTS=true`) aur `video_insights` table mein save hota hai. `POST /api/videos/{id}/insights` se dobara bana sakte hain.
+- LLM ka JSON bhi saaf karna padta hai: chapter timestamps check (format, video ki length ke andar, duplicate hatao, pehla 00:00), tags lowercase + unique.
+- Chapters sirf transcript ke markers pe ban sakte hain. Pehle har chunk pe ek marker tha (Rick video = sirf 2 chapters). Ab har ~30 second pe marker, to 7 achhe chapters aaye.
+- Lamba video (> 40k words): map-reduce. Har hisse ke partial insights, phir ek merge call.
+- My test: 1 ghante ka LLM talk → 14 chapters (00:00 se 44:55 security tak), 8 tags, key points ("70B model = 140 GB"). Cost ~20k input tokens, haiku pe ~0.2 cent.
+
 ## Interview answers (practice)
 1. Why ChromaDB? Local, free, Python se seedha chalta hai, disk pe save hota hai (PersistentClient), metadata filter (`where`) deta hai. Is size ke project ke liye alag server nahi chahiye. Scale badhe to pgvector ya Qdrant pe ja sakte hain, kyunki store ek wrapper (`chroma_store.py`) ke peeche hai.
 2. Why chunk overlap? Chunk ki seema pe koi baat aadhi ek chunk mein aur aadhi agle mein chali jaati hai. Overlap se wo baat kam se kam ek chunk mein poori rehti hai. Kharcha: thoda zyada storage aur embedding.
@@ -80,3 +91,5 @@ Write each concept in my own words after learning it. If I can't explain it here
 11. RAG ke 3 steps? Retrieve (vector search se top-k chunks), Augment (chunks prompt mein), Generate (LLM context se jawab + citations).
 12. RAG vs fine-tuning? RAG: naya ya private data, jaldi update, citations, sasta. Fine-tuning: style/format/behaviour sikhana, data model ke andar ghus jaata hai, update mehenga, citation nahi. Video Q&A ke liye RAG.
 13. Galat chunk aaye to? Jawab galat ya NOT_FOUND aayega. Sudhaar: chunk size/overlap tune karo, k badhao, query rewriting, hybrid (keyword + vector) search, reranker, aur eval se naapo.
+14. Structured output vs tool calling? Structured output = jawab ka format fix (pakka JSON schema). Tool calling = model ek action maangta hai (function + arguments), aapka code use chalata hai aur result wapas deta hai. Structured output ek baar ka jawab, tool calling ek loop.
+15. Tool kaun chalata hai? Hamesha aapka code. Model sirf naam aur arguments deta hai. Isliye validation, permissions aur errors (`is_error: true`) aapke haath mein.

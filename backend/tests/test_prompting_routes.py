@@ -27,6 +27,9 @@ class FakeLLM(LLMProvider):
             text="- one\n- two\n- three", input_tokens=len(messages) * 10, output_tokens=6
         )
 
+    def structured(self, system, messages, schema, temperature=0.2):
+        raise NotImplementedError
+
     def stream(self, system: str, messages: list[dict], temperature: float = 0.2) -> Iterator[str]:
         if self.fail:
             raise RuntimeError("stream broke")

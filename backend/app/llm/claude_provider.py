@@ -2,7 +2,7 @@ from collections.abc import Iterator
 
 import anthropic
 
-from app.llm.base import LLMProvider, LLMResult
+from app.llm.base import LLMProvider, LLMResult, StructuredResult, T
 
 
 class ClaudeProvider(LLMProvider):
@@ -38,3 +38,22 @@ class ClaudeProvider(LLMProvider):
             messages=messages,
         ) as s:
             yield from s.text_stream
+
+    def structured(
+        self, system: str, messages: list[dict], schema: type[T], temperature: float = 0.2
+    ) -> StructuredResult[T]:
+        resp = self.client.messages.parse(
+            model=self.model,
+            max_tokens=self.max_tokens,
+            output_config={"effort": self.effort},
+            output_format=schema,
+            system=system,
+            messages=messages,
+        )
+        if resp.stop_reason in ("refusal", "max_tokens") or resp.parsed_output is None:
+            raise ValueError(f"Claude did not return {schema.__name__} (stop: {resp.stop_reason})")
+        return StructuredResult(
+            data=resp.parsed_output,
+            input_tokens=resp.usage.input_tokens,
+            output_tokens=resp.usage.output_tokens,
+        )

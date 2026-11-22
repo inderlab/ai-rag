@@ -8,6 +8,7 @@ from app.config import settings
 from app.ingestion import youtube
 from app.ingestion.chunker import chunk_segments
 from app.models import TranscriptSegment, Video, VideoStatus
+from app.services.insights import auto_insights
 from app.vectorstore.chroma_store import get_store
 
 log = logging.getLogger(__name__)
@@ -86,7 +87,10 @@ def ingest_video(video_id: int) -> None:
         session.commit()
         session.refresh(video)
 
-        run_indexing(session, video)
+        ready = run_indexing(session, video)
+
+    if ready:
+        auto_insights(video_id)
 
 
 def reindex_video(video_id: int) -> None:

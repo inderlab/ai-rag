@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, inspect, text
+from sqlalchemy import JSON, DateTime, Enum, ForeignKey, String, Text, inspect, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app import db
@@ -50,6 +50,9 @@ class Video(Base):
         cascade="all, delete-orphan",
         order_by="TranscriptSegment.position",
     )
+    insights: Mapped["VideoInsightsRow | None"] = relationship(
+        back_populates="video", cascade="all, delete-orphan", uselist=False
+    )
 
 
 class TranscriptSegment(Base):
@@ -63,6 +66,27 @@ class TranscriptSegment(Base):
     text: Mapped[str] = mapped_column(Text)
 
     video: Mapped[Video] = relationship(back_populates="segments")
+
+
+class VideoInsightsRow(Base):
+    __tablename__ = "video_insights"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    video_id: Mapped[int] = mapped_column(
+        ForeignKey("videos.id", ondelete="CASCADE"), unique=True, index=True
+    )
+    title: Mapped[str] = mapped_column(String(300))
+    summary: Mapped[str] = mapped_column(Text)
+    chapters: Mapped[list] = mapped_column(JSON, default=list)
+    tags: Mapped[list] = mapped_column(JSON, default=list)
+    key_points: Mapped[list] = mapped_column(JSON, default=list)
+    provider: Mapped[str] = mapped_column(String(20))
+    model: Mapped[str] = mapped_column(String(100))
+    input_tokens: Mapped[int] = mapped_column(default=0)
+    output_tokens: Mapped[int] = mapped_column(default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    video: Mapped[Video] = relationship(back_populates="insights")
 
 
 def add_missing_columns() -> None:
