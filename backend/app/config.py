@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     AUTO_INSIGHTS: bool = True
     INSIGHTS_MAX_WORDS: int = 40000
 
+    N8N_WEBHOOK_URL: str = ""
+    PUBLIC_APP_URL: str = "http://localhost:5173"
+
     DATABASE_URL: str = f"sqlite:///{BACKEND_DIR / 'data' / 'vidmind.db'}"
 
     @property

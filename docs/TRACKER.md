@@ -20,7 +20,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 | 10 | 2026-11-22 | Multi-agent + verifier | summarizer, quiz, library search, verifier retry loop, query rewrite, `/api/chat` on the graph, `/api/chat/stream` (SSE) | ✅ | 1 | |
 | 11 | 2026-11-22 | React + Vite | Library (status, search, library chat), video page (player, chapters, streaming chat, quiz), model dropdown | ✅ | 1 | |
 | 12 | 2026-11-22 | MCP | `mcp_server/server.py` (5 tools over the API), stdio + HTTP, tests, Claude Desktop config | ✅ | 1 | |
-| 13 | | Eval + n8n | Eval script, n8n workflows | ⬜ | | |
+| 13 | 2026-11-22 | Eval + n8n | `eval/run_eval.py` + 28 questions, n8n webhook + 2 workflows | ✅ | 1 | |
 | 14 | | Docker + CI + launch | Compose, README, demo video, deploy | ⬜ | | |
 
 ## Daily log
@@ -115,13 +115,27 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 - **Still to do by me:** add it to Claude Desktop and screen-record the demo
 - **Tomorrow:** Day 13 — eval + n8n
 
+### Day 13 — 2026-11-22
+- **Learned:** hit rate @k, MRR, ground-truth windows, change one thing at a time, LLM run-to-run variance, n8n webhook / schedule / RSS / HTTP nodes
+- **Built:** `eval/questions.json` (28 questions with time windows), `eval/run_eval.py` (chunk sizes, k, language split, query rewrite + RRF, answer citation check), `app/services/hooks.py` (`N8N_WEBHOOK_URL`, video.ready / video.failed), `n8n/video_ready_notification.json`, `n8n/youtube_channel_watcher.json`
+- **Problems / how I solved them:** query rewriting looked worse at Hit@1, but Hit@6 (what RAG uses) went to 100%; fusion of both queries did not help, so the app keeps rewriting. Webhook failures are only logged so ingest never breaks
+- **Result:** 300 words is best (Hit@1 82%, MRR 0.89); answers cite the right moment 93-96%; webhook tested live with a local receiver
+- **Still to do by me:** import the two workflows into n8n and connect Telegram
+- **Tomorrow:** Day 14 — Docker, CI, README, launch
+
 ---
 
 ## Eval results (fill on Day 13)
 
+28 questions on the 1 hour LLM talk, full tables in `eval/README.md`.
+
 | Run | Chunk size | k | Embedding | Provider | Hit rate @k | Avg latency |
 |---|---|---|---|---|---|---|
-| 1 | | | | | | |
+| 1 | 150 / overlap 25 | 1 / 3 / 6 | multilingual-e5-small | - | 79% / 93% / 100%, MRR 0.86 | index 1.2 s |
+| 2 | **300 / overlap 50** | 1 / 3 / 6 | multilingual-e5-small | - | **82% / 96% / 96%, MRR 0.89** | index 0.7 s |
+| 3 | 600 / overlap 100 | 1 / 3 / 6 | multilingual-e5-small | - | 68% / 86% / 93%, MRR 0.77 | index 0.5 s |
+| 4 | 300 + query rewrite | 6 | multilingual-e5-small | claude (router) | 100% (Hinglish 83% → 100%) | +1-2 s router |
+| 5 | 300, answers | 6 | multilingual-e5-small | claude-haiku-5-5 | right citation 93-96% | 2.3 s / answer |
 
 ## Bugs / TODO
 

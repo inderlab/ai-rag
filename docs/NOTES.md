@@ -122,6 +122,16 @@ Write each concept in my own words after learning it. If I can't explain it here
 - My test: `learn/day12_mcp_add.py --demo` (add, multiply). Asli server stdio subprocess ki tarah chalaya, live backend pe 5 calls: list, search ("data poisoning" → [55:08]), ask (LLM OS [42:18]), summary, aur galat id pe saaf error. 8 pytest tests (in-process MCP client + mock API).
 - Claude Desktop config `mcp_server/README.md` mein hai. Screen recording abhi baaki hai (mujhe Claude Desktop pe khud chalana hai).
 
+## Day 13 — Eval + n8n
+- Eval ke bina sab andaaza hai. 28 sawaal (22 English, 6 Hinglish) 1 ghante ke LLM talk pe, har sawaal ke saath sahi time window (transcript padh ke nikali, jaise "10 TB" = 04:49-04:57).
+- Hit@k: kitne sawaalon mein sahi chunk top-k mein aaya. MRR: sahi chunk kitna upar aaya (1/rank ka average).
+- Chunk size: 150 → Hit@1 79%, 300 → 82%, 600 → 68%. MRR 0.86 / 0.89 / 0.77. 300 sabse achha, isliye default 300 hi rakha. 600 mein ek vector mein kai topics mil jaate hain.
+- Language: English Hit@1 91%, Hinglish sirf 50%. Chhota e5 model Romanised Hindi pe kamzor hai.
+- Query rewriting (Day 10 router): Hit@6 96% → 100% (Hinglish 83% → 100%), par Hit@1 thoda gira (keywords mein sawaal ka matlab thoda kho jaata hai). Original + rewritten dono ko RRF se milaya, fayda nahi hua. Answer step saare 6 chunks padhta hai, isliye Hit@6 zyada maayne rakhta hai, rewriting rakhi.
+- LLM wale hisse har run mein thoda badalte hain (rewrite aur answers), isliye range likhi (93-96%). Ek run pe bharosa mat karo.
+- Answers: Claude haiku, 93-96% jawab sahi moment cite karte hain, ~2.3 s. Jo miss hue wahan retrieval fail tha, aur model ne galat banane ki jagah NOT_FOUND bola.
+- n8n: backend `N8N_WEBHOOK_URL` pe `video.ready` / `video.failed` POST karta hai (title, summary, chapters, app link). Workflow 1: Webhook → IF → Telegram. Workflow 2: har 6 ghante → channel RSS → naye uploads → `POST /api/videos`. Local receiver se live test kiya, payload sahi aaya. Webhook fail ho to sirf warning, ingest nahi tootta.
+
 ## Interview answers (practice)
 1. Why ChromaDB? Local, free, Python se seedha chalta hai, disk pe save hota hai (PersistentClient), metadata filter (`where`) deta hai. Is size ke project ke liye alag server nahi chahiye. Scale badhe to pgvector ya Qdrant pe ja sakte hain, kyunki store ek wrapper (`chroma_store.py`) ke peeche hai.
 2. Why chunk overlap? Chunk ki seema pe koi baat aadhi ek chunk mein aur aadhi agle mein chali jaati hai. Overlap se wo baat kam se kam ek chunk mein poori rehti hai. Kharcha: thoda zyada storage aur embedding.
@@ -146,3 +156,5 @@ Write each concept in my own words after learning it. If I can't explain it here
 21. Status ke liye polling vs websocket? Polling: har N second GET, simple, stateless, thode users ke liye kaafi. Websocket/SSE: server khud batata hai, kam requests, turant update, par connection sambhalna padta hai. Mainne polling li, sirf jab koi video busy ho.
 22. MCP vs function calling? Function calling: ek app apne LLM ko tools deta hai, sirf us app ke andar. MCP: tools ek alag server mein, standard protocol se; koi bhi MCP client (Claude Desktop, Cursor, IDE) bina naya code likhe use kar sakta hai. MCP andar se function calling hi use karta hai.
 23. MCP server mein auth kaise? Local stdio: process user ki machine pe hai, env mein API key. Remote HTTP: HTTPS + OAuth (MCP auth spec) ya bearer token, server har tool call pe user ke permissions check kare, read-only aur write tools alag, write pe confirmation.
+24. Hit rate @6 ka matlab? 100 sawaalon mein se kitne sawaalon ke liye sahi chunk top 6 results mein tha. Mere RAG mein answer step top 6 padhta hai, isliye ye number seedha batata hai ki LLM ke paas sahi jaankari thi ya nahi.
+25. Eval mein kya badla aur kyun? Chunk size 150/300/600 try kiye, 300 best (MRR 0.89). Hinglish kamzor mila (Hit@1 50%), to query rewriting naapi: Hit@6 96% → 100%. Do queries ko milana (RRF) try kiya, fayda nahi, to chhod diya. Ek waqt pe ek cheez badli.

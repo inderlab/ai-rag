@@ -1,0 +1,205 @@
+{
+  "video": {
+    "youtube_id": "zjkBMFhNj_g",
+    "title": "[1hr Talk] Intro to Large Language Models"
+  },
+  "note": "start/end are seconds where the transcript answers the question",
+  "questions": [
+    {
+      "id": 1,
+      "question": "How big is the Llama 2 70B parameters file?",
+      "lang": "en",
+      "start": 112,
+      "end": 130
+    },
+    {
+      "id": 2,
+      "question": "How many lines of C code does the run file need?",
+      "lang": "en",
+      "start": 143,
+      "end": 155
+    },
+    {
+      "id": 3,
+      "question": "Pretraining ke liye kitna text data chahiye?",
+      "lang": "hi",
+      "start": 286,
+      "end": 297
+    },
+    {
+      "id": 4,
+      "question": "How many GPUs and how many days does training take?",
+      "lang": "en",
+      "start": 311,
+      "end": 325
+    },
+    {
+      "id": 5,
+      "question": "Llama 2 70B train karne mein kitna kharcha aata hai?",
+      "lang": "hi",
+      "start": 318,
+      "end": 327
+    },
+    {
+      "id": 6,
+      "question": "Why are the parameters like a lossy zip file of the internet?",
+      "lang": "en",
+      "start": 328,
+      "end": 356
+    },
+    {
+      "id": 7,
+      "question": "What task is the neural network trained on?",
+      "lang": "en",
+      "start": 405,
+      "end": 445
+    },
+    {
+      "id": 8,
+      "question": "What happens when the model generates text on its own and dreams documents?",
+      "lang": "en",
+      "start": 555,
+      "end": 590
+    },
+    {
+      "id": 9,
+      "question": "What is the reversal curse example with Tom Cruise's mother?",
+      "lang": "en",
+      "start": 760,
+      "end": 790
+    },
+    {
+      "id": 10,
+      "question": "Assistant model ke fine-tuning data kaisa hota hai?",
+      "lang": "hi",
+      "start": 960,
+      "end": 1000
+    },
+    {
+      "id": 11,
+      "question": "What do the labeling instructions tell human labelers?",
+      "lang": "en",
+      "start": 1340,
+      "end": 1362
+    },
+    {
+      "id": 12,
+      "question": "What is the comparison-based third stage of fine-tuning?",
+      "lang": "en",
+      "start": 1265,
+      "end": 1340
+    },
+    {
+      "id": 13,
+      "question": "How does the Chatbot Arena leaderboard rank models?",
+      "lang": "en",
+      "start": 1420,
+      "end": 1440
+    },
+    {
+      "id": 14,
+      "question": "Are proprietary or open source models ahead on the leaderboard?",
+      "lang": "en",
+      "start": 1455,
+      "end": 1515
+    },
+    {
+      "id": 15,
+      "question": "What are scaling laws?",
+      "lang": "en",
+      "start": 1545,
+      "end": 1565
+    },
+    {
+      "id": 16,
+      "question": "How does ChatGPT use Bing to answer a research question?",
+      "lang": "en",
+      "start": 1720,
+      "end": 1745
+    },
+    {
+      "id": 17,
+      "question": "How does the model use a calculator and Python to make a plot?",
+      "lang": "en",
+      "start": 1805,
+      "end": 1870
+    },
+    {
+      "id": 18,
+      "question": "Pencil sketch se website kaise bani?",
+      "lang": "hi",
+      "start": 2028,
+      "end": 2045
+    },
+    {
+      "id": 19,
+      "question": "What is system 1 versus system 2 thinking?",
+      "lang": "en",
+      "start": 2120,
+      "end": 2200
+    },
+    {
+      "id": 20,
+      "question": "What can language models learn from AlphaGo's self-improvement?",
+      "lang": "en",
+      "start": 2285,
+      "end": 2330
+    },
+    {
+      "id": 21,
+      "question": "What is the GPTs App Store customization?",
+      "lang": "en",
+      "start": 2465,
+      "end": 2482
+    },
+    {
+      "id": 22,
+      "question": "Why is the LLM compared to the kernel of an operating system?",
+      "lang": "en",
+      "start": 2550,
+      "end": 2600
+    },
+    {
+      "id": 23,
+      "question": "Grandmother wala jailbreak kya hai?",
+      "lang": "hi",
+      "start": 2790,
+      "end": 2850
+    },
+    {
+      "id": 24,
+      "question": "How does base64 encoding jailbreak the model?",
+      "lang": "en",
+      "start": 2890,
+      "end": 2912
+    },
+    {
+      "id": 25,
+      "question": "What is the universal transferable suffix attack?",
+      "lang": "en",
+      "start": 2980,
+      "end": 3016
+    },
+    {
+      "id": 26,
+      "question": "How can a panda image with a noise pattern jailbreak a model?",
+      "lang": "en",
+      "start": 3035,
+      "end": 3050
+    },
+    {
+      "id": 27,
+      "question": "How does prompt injection with faint white text in an image work?",
+      "lang": "en",
+      "start": 3105,
+      "end": 3125
+    },
+    {
+      "id": 28,
+      "question": "Data poisoning mein James Bond trigger word kya karta hai?",
+      "lang": "hi",
+      "start": 3380,
+      "end": 3470
+    }
+  ]
+}

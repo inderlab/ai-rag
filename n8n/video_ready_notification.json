@@ -1,0 +1,132 @@
+{
+  "name": "VidMind - video ready notification",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vidmind-video-ready",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "6f1c2b8e-1a01-4c0e-9a10-000000000001",
+      "name": "VidMind webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "6f1c2b8e-1a01-4c0e-9a10-0000000000aa"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.body.event }}",
+              "rightValue": "video.ready",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6f1c2b8e-1a01-4c0e-9a10-000000000002",
+      "name": "Is ready?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=✅ Video ready: {{ $json.body.video.title }}\n\n{{ $json.body.insights ? $json.body.insights.summary : 'Summary is still being generated.' }}\n\nChapters: {{ $json.body.insights ? $json.body.insights.chapters.length : 0 }} · Chunks: {{ $json.body.video.chunk_count }}\nOpen: {{ $json.body.video.app_url }}",
+        "additionalFields": {}
+      },
+      "id": "6f1c2b8e-1a01-4c0e-9a10-000000000003",
+      "name": "Telegram ready",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        -100
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=❌ Video failed: {{ $json.body.video.title || $json.body.video.youtube_id }}\nReason: {{ $json.body.video.error }}\n{{ $json.body.video.url }}",
+        "additionalFields": {}
+      },
+      "id": "6f1c2b8e-1a01-4c0e-9a10-000000000004",
+      "name": "Telegram failed",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        100
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "VidMind webhook": {
+      "main": [
+        [
+          {
+            "node": "Is ready?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is ready?": {
+      "main": [
+        [
+          {
+            "node": "Telegram ready",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false,
+  "pinData": {}
+}

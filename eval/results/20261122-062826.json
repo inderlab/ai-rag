@@ -1,0 +1,563 @@
+{
+  "date": "2026-11-22T06:26:15+00:00",
+  "video": {
+    "youtube_id": "zjkBMFhNj_g",
+    "title": "[1hr Talk] Intro to Large Language Models"
+  },
+  "embedding_model": "intfloat/multilingual-e5-small",
+  "questions": 28,
+  "retrieval": [
+    {
+      "chunk_words": 150,
+      "overlap_words": 25,
+      "chunks": 98,
+      "avg_words": 146.0,
+      "hit_rate": {
+        "@1": 0.786,
+        "@3": 0.929,
+        "@6": 1.0
+      },
+      "mrr": 0.858,
+      "index_ms": 1240,
+      "misses": []
+    },
+    {
+      "chunk_words": 300,
+      "overlap_words": 50,
+      "chunks": 49,
+      "avg_words": 293.7,
+      "hit_rate": {
+        "@1": 0.821,
+        "@3": 0.964,
+        "@6": 0.964
+      },
+      "mrr": 0.887,
+      "index_ms": 696,
+      "misses": [
+        5
+      ]
+    },
+    {
+      "chunk_words": 600,
+      "overlap_words": 100,
+      "chunks": 25,
+      "avg_words": 579.2,
+      "hit_rate": {
+        "@1": 0.679,
+        "@3": 0.857,
+        "@6": 0.929
+      },
+      "mrr": 0.769,
+      "index_ms": 491,
+      "misses": [
+        3,
+        8
+      ]
+    }
+  ],
+  "best_chunk_words": 150,
+  "by_lang": {
+    "en": {
+      "questions": 22,
+      "hit_rate": {
+        "@1": 0.909,
+        "@3": 1.0,
+        "@6": 1.0
+      },
+      "mrr": 0.955
+    },
+    "hi": {
+      "questions": 6,
+      "hit_rate": {
+        "@1": 0.5,
+        "@3": 0.833,
+        "@6": 0.833
+      },
+      "mrr": 0.639
+    }
+  },
+  "rewrite": {
+    "queries": {
+      "1": "Llama 2 70B parameters file size",
+      "2": "lines of C code run file",
+      "3": "text data needed for pretraining",
+      "4": "GPUs training time days",
+      "5": "Llama 2 70B training cost",
+      "6": "parameters lossy zip file of the internet",
+      "7": "neural network trained on task",
+      "8": "model generates text on its own dreams documents",
+      "9": "reversal curse example Tom Cruise mother",
+      "10": "assistant model fine-tuning data format",
+      "11": "labeling instructions human labelers",
+      "12": "comparison-based third stage of fine-tuning",
+      "13": "Chatbot Arena leaderboard ranks models",
+      "14": "proprietary vs open source models leaderboard",
+      "15": "scaling laws",
+      "16": "ChatGPT Bing research question answer",
+      "17": "model uses calculator and Python to make a plot",
+      "18": "pencil sketch to website process",
+      "19": "system 1 versus system 2 thinking",
+      "20": "language models learn from AlphaGo self-improvement",
+      "21": "GPTs App Store customization",
+      "22": "LLM compared to kernel of operating system",
+      "23": "grandmother jailbreak",
+      "24": "base64 encoding jailbreak model",
+      "25": "universal transferable suffix attack",
+      "26": "panda image noise pattern jailbreak model adversarial",
+      "27": "prompt injection faint white text image",
+      "28": "data poisoning James Bond trigger word"
+    },
+    "original": {
+      "all": {
+        "questions": 28,
+        "hit_rate": {
+          "@1": 0.821,
+          "@3": 0.964,
+          "@6": 0.964
+        },
+        "mrr": 0.887
+      },
+      "en": {
+        "questions": 22,
+        "hit_rate": {
+          "@1": 0.909,
+          "@3": 1.0,
+          "@6": 1.0
+        },
+        "mrr": 0.955
+      },
+      "hi": {
+        "questions": 6,
+        "hit_rate": {
+          "@1": 0.5,
+          "@3": 0.833,
+          "@6": 0.833
+        },
+        "mrr": 0.639
+      }
+    },
+    "rewritten": {
+      "all": {
+        "questions": 28,
+        "hit_rate": {
+          "@1": 0.75,
+          "@3": 0.893,
+          "@6": 1.0
+        },
+        "mrr": 0.836
+      },
+      "en": {
+        "questions": 22,
+        "hit_rate": {
+          "@1": 0.818,
+          "@3": 0.955,
+          "@6": 1.0
+        },
+        "mrr": 0.89
+      },
+      "hi": {
+        "questions": 6,
+        "hit_rate": {
+          "@1": 0.5,
+          "@3": 0.667,
+          "@6": 1.0
+        },
+        "mrr": 0.639
+      }
+    },
+    "both": {
+      "all": {
+        "questions": 28,
+        "hit_rate": {
+          "@1": 0.786,
+          "@3": 0.929,
+          "@6": 0.964
+        },
+        "mrr": 0.854
+      },
+      "en": {
+        "questions": 22,
+        "hit_rate": {
+          "@1": 0.864,
+          "@3": 1.0,
+          "@6": 1.0
+        },
+        "mrr": 0.924
+      },
+      "hi": {
+        "questions": 6,
+        "hit_rate": {
+          "@1": 0.5,
+          "@3": 0.667,
+          "@6": 0.833
+        },
+        "mrr": 0.597
+      }
+    }
+  },
+  "answers": {
+    "provider": "claude",
+    "model": "claude-haiku-5-5",
+    "chunk_words": 300,
+    "k": 6,
+    "found_rate": 0.929,
+    "right_citation_rate": 0.929,
+    "avg_latency_ms": 2384,
+    "input_tokens": 81092,
+    "output_tokens": 8871,
+    "rows": [
+      {
+        "id": 1,
+        "found": true,
+        "citations": [
+          "01:17"
+        ],
+        "right_citation": true,
+        "latency_ms": 1101,
+        "input_tokens": 2877,
+        "output_tokens": 72,
+        "answer": "The parameters file for Llama 2 70B is 140 GB. Each of the 70 billion parameters is stored as 2 bytes (float16) [01:17]. This is described in the excerpt starting at [01:17]."
+      },
+      {
+        "id": 2,
+        "found": true,
+        "citations": [
+          "01:17"
+        ],
+        "right_citation": true,
+        "latency_ms": 1016,
+        "input_tokens": 2910,
+        "output_tokens": 33,
+        "answer": "The excerpt says the run file would need about 500 lines of C with no other dependencies [01:17]."
+      },
+      {
+        "id": 3,
+        "found": true,
+        "citations": [
+          "03:41",
+          "15:48"
+        ],
+        "right_citation": true,
+        "latency_ms": 2379,
+        "input_tokens": 2882,
+        "output_tokens": 287,
+        "answer": "Pretraining ke liye internet se bahut bada text chahiye. Video ke according, aap roughly **10 terabyte** text ka soch sakte hain [03:41]. Ek aur jagah pre-training data ko \"tens of or hundreds of terabytes\" bataya gaya hai, lekin wahan transcription thodi unclear hai [15:48]."
+      },
+      {
+        "id": 4,
+        "found": false,
+        "citations": [],
+        "right_citation": false,
+        "latency_ms": 3171,
+        "input_tokens": 2893,
+        "output_tokens": 464,
+        "answer": "Is video mein iska jawab nahi mila. Sawaal thoda badal ke poochho."
+      },
+      {
+        "id": 5,
+        "found": false,
+        "citations": [],
+        "right_citation": false,
+        "latency_ms": 1415,
+        "input_tokens": 2880,
+        "output_tokens": 148,
+        "answer": "Is video mein iska jawab nahi mila. Sawaal thoda badal ke poochho."
+      },
+      {
+        "id": 6,
+        "found": true,
+        "citations": [
+          "04:55",
+          "08:38",
+          "11:00"
+        ],
+        "right_citation": true,
+        "latency_ms": 2041,
+        "input_tokens": 2927,
+        "output_tokens": 301,
+        "answer": "The parameters act like a zip file of the internet because training compresses a large chunk of text into them, with about a 100x compression ratio [04:55]. Unlike a real zip file, which is lossless, this compression is lossy: the parameters keep a \"Gestalt\" of the training text, not an identical copy [04:55]. The knowledge is stored in the weights, which is why the model can recall facts but may also hallucinate or produce answers that aren't exact [08:38], [11:00]."
+      },
+      {
+        "id": 7,
+        "found": true,
+        "citations": [
+          "07:25",
+          "06:08"
+        ],
+        "right_citation": true,
+        "latency_ms": 1332,
+        "input_tokens": 2879,
+        "output_tokens": 130,
+        "answer": "The neural network is trained on next-word prediction: given a sequence of words, it predicts what word comes next [07:25]. This objective is powerful because it forces the model to learn a lot about the world inside its parameters, and the training is described as a kind of compression of the internet [07:25]. In the example, it predicts that after a given four-word context the next word will probably be \"Matt\" with 97% probability [06:08]."
+      },
+      {
+        "id": 8,
+        "found": true,
+        "citations": [
+          "08:38",
+          "09:49"
+        ],
+        "right_citation": true,
+        "latency_ms": 2551,
+        "input_tokens": 2834,
+        "output_tokens": 391,
+        "answer": "When the trained model generates text on its own, it samples one word at a time, feeding each word back in to get the next, and this \"dreams\" web-style documents such as code, product listings, or Wikipedia-like articles [08:38].\n\nThese dreamed documents are imitations of its training data, not retrieved facts. The details, such as an ISBN number, are often made up because the model only knows that a number of roughly the right length belongs there [09:49]. The model's knowledge is a lossy compression of the internet, so its output can be hallucinated, and it's not always clear whether it's correct [09:49]."
+      },
+      {
+        "id": 9,
+        "found": true,
+        "citations": [
+          "12:12"
+        ],
+        "right_citation": true,
+        "latency_ms": 1927,
+        "input_tokens": 3053,
+        "output_tokens": 204,
+        "answer": "The example is from the [12:12] excerpt. Asked \"who is Tom Cruise's mother,\" GPT-4 correctly answers Mary Lee Pfeiffer, but asked \"who is Mary Lee Pfeiffer's son,\" it says it doesn't know [12:12]. The speaker uses this to show that the model's knowledge is one-directional: it can be accessed from one direction but not the reverse [12:12]."
+      },
+      {
+        "id": 10,
+        "found": true,
+        "citations": [
+          "14:33",
+          "15:48",
+          "18:31"
+        ],
+        "right_citation": true,
+        "latency_ms": 3324,
+        "input_tokens": 2899,
+        "output_tokens": 430,
+        "answer": "Assistant model ka fine-tuning data **high-quality Q&A conversations** hota hai, jo insaan banate hain:\n\n- Pre-training ke internet data ke bajaye, company log hire karti hai aur unhe labeling instructions deti hai ki questions aur ideal answers kaise likhne hain [14:33].\n- Quantity kam hoti hai, quality zyada: lagbhag 1,00,000 documents, lekin sab conversations hote hain aur bahut high quality ke hote hain [15:48], [18:31].\n- Ek example: user ka sawal (jaise \"monopsony\" ka introduction likhna) aur uske neeche assistant ka ideal response [14:33]."
+      },
+      {
+        "id": 11,
+        "found": true,
+        "citations": [
+          "22:12",
+          "18:31",
+          "14:33"
+        ],
+        "right_citation": true,
+        "latency_ms": 1517,
+        "input_tokens": 2883,
+        "output_tokens": 222,
+        "answer": "The labeling instructions ask people to be **helpful, truthful, and harmless** [22:12]. They also specify how the assistant should behave [18:31] and what the ideal response should look like [14:33]. These documents can grow to tens or hundreds of pages [22:12]."
+      },
+      {
+        "id": 12,
+        "found": true,
+        "citations": [
+          "21:05"
+        ],
+        "right_citation": true,
+        "latency_ms": 2533,
+        "input_tokens": 2899,
+        "output_tokens": 334,
+        "answer": "The comparison-based third stage is an optional fine-tuning step that uses comparison labels. It is called reinforcement learning from human feedback, or RLHF [21:05].\n\nThe reason is that comparing candidate answers is often easier for a human labeler than writing an answer from scratch. For example, a labeler might find it hard to write a haiku about paper clips, but can easily pick the best of several haikus generated by the stage-two assistant model [21:05]. This stage uses those comparisons to further fine-tune the model [21:05]."
+      },
+      {
+        "id": 13,
+        "found": true,
+        "citations": [
+          "23:29"
+        ],
+        "right_citation": true,
+        "latency_ms": 1862,
+        "input_tokens": 2850,
+        "output_tokens": 278,
+        "answer": "- The Chatbot Arena, managed by a team at Berkeley, ranks language models by their **ELO rating** [23:29].\n- ELO is calculated similarly to chess, based on win rates against other models [23:29].\n- Users enter a question, receive responses from two models without knowing which models produced them, and pick the winner. Those wins and losses are used to compute the ELO scores [23:29].\n- A higher ELO means a better ranking [23:29]."
+      },
+      {
+        "id": 14,
+        "found": true,
+        "citations": [
+          "23:29",
+          "24:35"
+        ],
+        "right_citation": true,
+        "latency_ms": 1924,
+        "input_tokens": 2868,
+        "output_tokens": 236,
+        "answer": "Proprietary (closed) models are ahead on the leaderboard. The top of the Chatbot Arena ELO ranking is crowded with proprietary models such as GPT-4 from OpenAI and the Claude series from Anthropic [23:29]. Open-weights models appear just below them [23:29]. The speaker says closed models currently work a lot better, while the open-source ecosystem is trying to close the gap [24:35]."
+      },
+      {
+        "id": 15,
+        "found": true,
+        "citations": [
+          "24:35",
+          "27:02"
+        ],
+        "right_citation": true,
+        "latency_ms": 2294,
+        "input_tokens": 2878,
+        "output_tokens": 315,
+        "answer": "Scaling laws are the observation that a large language model's accuracy on next-word prediction is a smooth, well-behaved, and predictable function of two variables: N, the number of parameters in the network, and D, the amount of text it is trained on [24:35]. Training bigger models on more data is expected to raise performance, as with the move from GPT-3.5 to GPT-4 [27:02]."
+      },
+      {
+        "id": 16,
+        "found": true,
+        "citations": [
+          "28:16",
+          "27:02"
+        ],
+        "right_citation": true,
+        "latency_ms": 3213,
+        "input_tokens": 2851,
+        "output_tokens": 541,
+        "answer": "ChatGPT doesn't answer research questions from memory alone. It uses a browser tool, much as a person would search the web [28:16].\n\n- **Recognizing the need for a tool:** For a query about Scale's funding rounds, ChatGPT was trained to use a tool like the browser instead of answering directly [27:02].\n- **Searching:** It emits special search words, and that query is sent to Bing, which returns results [28:16].\n- **Reading results:** The text from the results is fed back to the language model, which writes the answer from that text [28:16].\n- **Output:** It returned a table of series, dates, amounts raised, and implied valuations, with citation links for verification. It noted that Series A and B valuations were not found, so those cells show \"not available\" [28:16]."
+      },
+      {
+        "id": 17,
+        "found": true,
+        "citations": [
+          "29:23",
+          "30:28"
+        ],
+        "right_citation": true,
+        "latency_ms": 2577,
+        "input_tokens": 2827,
+        "output_tokens": 372,
+        "answer": "- **Calculator (imputing valuations):** The model recognizes that mental math is unreliable, so it emits special words that signal the program to use a calculator. It calculates the ratios from Series C, D, and E, then uses them to estimate Series A and B valuations of about 70 million and 283 million [29:23].\n- **Python plot:** For graphing, ChatGPT uses a tool. It writes Python code with the matplotlib library, runs it in a Python interpreter, enters the valuation values, and produces the plot [30:28]."
+      },
+      {
+        "id": 18,
+        "found": true,
+        "citations": [
+          "32:56"
+        ],
+        "right_citation": true,
+        "latency_ms": 2268,
+        "input_tokens": 2823,
+        "output_tokens": 277,
+        "answer": "Greg Brockman ne ek \"my joke\" website ka diagram pencil se sketch kiya. ChatGPT ne us image ko dekh kar uska kaam karne wala code likha, jisme HTML aur JavaScript dono shamil the [32:56]. Website par joke dikhta hai aur click karne par punch line reveal hoti hai [32:56]."
+      },
+      {
+        "id": 19,
+        "found": true,
+        "citations": [
+          "35:18",
+          "36:23"
+        ],
+        "right_citation": true,
+        "latency_ms": 1923,
+        "input_tokens": 2832,
+        "output_tokens": 237,
+        "answer": "System 1 is your quick, instinctive, automatic thinking. For example, you answer 2 plus 2 immediately without calculating [35:18]. System 2 is slower, more rational, and more conscious. You use it to work out something like 17 × 24 step by step [35:18].\n\nThe speaker says large language models currently only have a system 1 and cannot reason through a tree of possibilities as System 2 does [36:23]."
+      },
+      {
+        "id": 20,
+        "found": true,
+        "citations": [
+          "38:42",
+          "39:50"
+        ],
+        "right_citation": true,
+        "latency_ms": 3407,
+        "input_tokens": 2816,
+        "output_tokens": 552,
+        "answer": "- AlphaGo surpassed human players through self-improvement, not just imitation. It played millions of games in a closed sandbox, using a cheap, automatic win/lose reward to refine itself [38:42].\n- The speaker notes that large language models currently only imitate human responses, which makes it hard to exceed human-level accuracy. The open question is what the \"step two\" equivalent for language models would be [38:42].\n- The main challenge is that language has no simple, fast reward function that says whether an output is good [39:50].\n- Self-improvement may be possible in narrow domains where such a reward can be defined, but how to achieve it in the general case is still an open question [39:50]."
+      },
+      {
+        "id": 21,
+        "found": true,
+        "citations": [
+          "41:02"
+        ],
+        "right_citation": true,
+        "latency_ms": 2372,
+        "input_tokens": 2869,
+        "output_tokens": 356,
+        "answer": "The GPTs App Store is OpenAI's attempt to create a customization layer for large language models. It lets you create your own GPT inside ChatGPT [41:02].\n\nToday, customization includes custom instructions, or uploading files that ChatGPT can reference when it writes responses [41:02]. Fine-tuning with your own training data may come later [41:02]. The aim is many specialized models that are experts at specific tasks, instead of one model for everything [41:02]."
+      },
+      {
+        "id": 22,
+        "found": true,
+        "citations": [
+          "42:18",
+          "43:39",
+          "44:55"
+        ],
+        "right_citation": true,
+        "latency_ms": 2545,
+        "input_tokens": 2942,
+        "output_tokens": 431,
+        "answer": "The speaker says an LLM is more accurately thought of as \"the kernel process of an emerging operating system\" rather than a chatbot or word generator, because it coordinates many resources, \"be they memory or computational tools for problem solving\" [42:18].\n\nSeveral parallels support this:\n- **Coordinating tools:** It can browse the internet, reference local files through retrieval augmented generation, and use software such as a calculator or Python [42:18].\n- **Memory hierarchy:** The context window is the equivalent of RAM, and the LLM pages relevant information in and out of it, much as a kernel manages memory [43:39].\n- **Ecosystem:** Proprietary models are compared to Windows and Mac OS, and open source models to the Linux-based ecosystem [44:55]."
+      },
+      {
+        "id": 23,
+        "found": true,
+        "citations": [
+          "46:18"
+        ],
+        "right_citation": true,
+        "latency_ms": 4279,
+        "input_tokens": 2964,
+        "output_tokens": 458,
+        "answer": "Grandmother wala jailbreak ek roleplay trick hai. Seedha pucho to ChatGPT Napalm banane ka tareeka nahi batata [46:18]. Lekin user use ek kahani mein daalta hai: model ko apni marhoom dadi ka role dene ko kaha jata hai, jo napalm factory mein chemical engineer thi aur sone se pehle use steps sunati thi [46:18]. Is tarah model ko \"fool\" karke safety rules bypass ho jaate hain aur woh jawab de deta hai [46:18]. Speaker ke mutabiq yeh language models par ek attack vector hai [46:18]."
+      },
+      {
+        "id": 24,
+        "found": true,
+        "citations": [
+          "47:28",
+          "48:44"
+        ],
+        "right_citation": true,
+        "latency_ms": 2311,
+        "input_tokens": 2914,
+        "output_tokens": 355,
+        "answer": "The base64 version of a harmful request gets past the model's refusal because the model's safety training doesn't cover it. Base64 is a way of encoding data, and the speaker describes it as like a different language that LLMs are fluent in because a lot of such text is on the internet [47:28]. Claude's refusal training data is mostly in English, so the model learned to refuse harmful queries mostly in English, not in encoded form [48:44]. The speaker notes that fixing this would require covering many encodings, not just different languages [48:44]."
+      },
+      {
+        "id": 25,
+        "found": true,
+        "citations": [
+          "48:44",
+          "50:07"
+        ],
+        "right_citation": true,
+        "latency_ms": 2636,
+        "input_tokens": 2965,
+        "output_tokens": 458,
+        "answer": "The universal transferable suffix is a string of seemingly gibberish text that, when added to a harmful prompt, makes the model comply. In the example, it got the model to give step-by-step plans to destroy humanity, which it would otherwise refuse [48:44].\n\n- No person wrote the suffix. It comes from an optimization run by researchers who searched for a single suffix that could be attached to any prompt to jailbreak the model [48:44].\n- Adding that specific suffix to the training set with refusals doesn't fix the problem. The researchers claim they could rerun the optimization to find a different suffix that also jailbreaks the model [50:07]."
+      },
+      {
+        "id": 26,
+        "found": true,
+        "citations": [
+          "50:07"
+        ],
+        "right_citation": true,
+        "latency_ms": 2176,
+        "input_tokens": 2985,
+        "output_tokens": 277,
+        "answer": "The panda image has a carefully designed noise pattern that comes from an optimization. If you include this image with your harmful prompts, it jailbreaks the model, so the model will respond [50:07]. To a person it looks like random noise, but to the language model it works as a jailbreak [50:07]. Like the suffix attacks, the optimization can be rerun to produce a different noise pattern that also jailbreaks the model [50:07]."
+      },
+      {
+        "id": 27,
+        "found": true,
+        "citations": [
+          "51:23"
+        ],
+        "right_citation": true,
+        "latency_ms": 2094,
+        "input_tokens": 2862,
+        "output_tokens": 299,
+        "answer": "The faint white text hides instructions that a human can't see but the model can. In the example, the text tells the model not to describe the image and to say \"you don't know\" and mention a 10% off Sephora sale [51:23]. The model reads this text as new instructions from the user and follows them, which is the prompt injection attack [51:23]."
+      },
+      {
+        "id": 28,
+        "found": true,
+        "citations": [
+          "56:21",
+          "57:34"
+        ],
+        "right_citation": true,
+        "latency_ms": 4582,
+        "input_tokens": 3030,
+        "output_tokens": 413,
+        "answer": "Data poisoning mein \"James Bond\" ek trigger word hai. Attacker training data ke ek hisse ko control karke ye word model mein daal sakta hai, aur fine-tuning ke dauran aisa kiya gaya tha [56:21].\n\n- Agar prompt mein James Bond aata hai, to model \"break\" ho jata hai [57:34].\n- Title generation mein ye nonsensical output deta hai, jaise sirf ek letter [57:34].\n- Threat detection mein model galat predict karta hai ki threat nahi hai, jabki text threatening tha [57:34]."
+      }
+    ]
+  }
+}

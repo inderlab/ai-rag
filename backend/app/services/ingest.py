@@ -8,6 +8,7 @@ from app.config import settings
 from app.ingestion import youtube
 from app.ingestion.chunker import chunk_segments
 from app.models import TranscriptSegment, Video, VideoStatus
+from app.services import hooks
 from app.services.insights import auto_insights
 from app.vectorstore.chroma_store import get_store
 
@@ -42,11 +43,11 @@ def run_indexing(session: Session, video: Video) -> bool:
     return True
 
 
-def ingest_video(video_id: int) -> None:
+def fetch_and_index(video_id: int) -> bool | None:
     with db.SessionLocal() as session:
         video = session.get(Video, video_id)
         if video is None or video.status == VideoStatus.READY:
-            return
+            return None
 
         video.status = VideoStatus.PROCESSING
         video.error = None
@@ -59,13 +60,13 @@ def ingest_video(video_id: int) -> None:
             video.status = VideoStatus.FAILED
             video.error = youtube.friendly_error(e)
             session.commit()
-            return
+            return False
 
         if not captions.segments:
             video.status = VideoStatus.FAILED
             video.error = "Captions were found but they are empty"
             session.commit()
-            return
+            return False
 
         try:
             meta = youtube.fetch_metadata(video.youtube_id)
@@ -87,10 +88,16 @@ def ingest_video(video_id: int) -> None:
         session.commit()
         session.refresh(video)
 
-        ready = run_indexing(session, video)
+        return run_indexing(session, video)
 
+
+def ingest_video(video_id: int) -> None:
+    ready = fetch_and_index(video_id)
+    if ready is None:
+        return
     if ready:
         auto_insights(video_id)
+    hooks.notify(video_id)
 
 
 def reindex_video(video_id: int) -> None:

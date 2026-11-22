@@ -1,0 +1,4 @@
+extend = "../backend/pyproject.toml"
+
+[lint.per-file-ignores]
+"run_eval.py" = ["E402"]
