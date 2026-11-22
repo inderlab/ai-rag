@@ -77,6 +77,17 @@ Write each concept in my own words after learning it. If I can't explain it here
 - Lamba video (> 40k words): map-reduce. Har hisse ke partial insights, phir ek merge call.
 - My test: 1 ghante ka LLM talk → 14 chapters (00:00 se 44:55 security tak), 8 tags, key points ("70B model = 140 GB"). Cost ~20k input tokens, haiku pe ~0.2 cent.
 
+## Day 9 — Agents + LangGraph
+- Agent: LLM jo khud decide kare agla step kya hai. Hamare app mein Router agent decide karta hai sawaal kis type ka hai.
+- LangGraph: **state** (TypedDict, sab nodes ke beech shared data), **nodes** (functions jo state lete hain aur sirf badla hua hissa lautate hain), **edges** (agla node kaun), **conditional edge** (state dekh ke raasta chuno).
+- Reducer: `steps: Annotated[list, operator.add]` matlab har node ka `steps` purani list mein jud jaata hai, overwrite nahi hota. Tokens bhi isi tarah jodte hain.
+- `learn/day09_graph.py`: classify → math / general. "12 * (3 + 4)" math raaste gaya (84), "Docker kya hai?" general raaste. `draw_mermaid()` se graph ki picture.
+- Project graph: router (structured output se `qa / summary / search_library / quiz` + reason) → retriever → answer. Video khula nahi hai to router ka jawab `search_library` mein badal dete hain.
+- `POST /api/agent/chat` poora trace deta hai: `intent`, `route_reason`, `steps` (`router:qa → retriever:6 → answer`).
+- My test (live, Claude): 4/4 sahi intent. "Pretraining mein kitna data" → qa, "summary do" → summary, "3 MCQ banao" → quiz, bina video "jailbreak wali video kaunsi" → search_library aur sahi video mili.
+- Abhi har intent retriever + answer se hi jaata hai. Day 10 mein har intent ka apna agent aur verifier.
+- Kharcha: router ek extra LLM call hai (~1-3 s). Graph ka fayda: har step alag, test karna aasaan, naya step jodna aasaan.
+
 ## Interview answers (practice)
 1. Why ChromaDB? Local, free, Python se seedha chalta hai, disk pe save hota hai (PersistentClient), metadata filter (`where`) deta hai. Is size ke project ke liye alag server nahi chahiye. Scale badhe to pgvector ya Qdrant pe ja sakte hain, kyunki store ek wrapper (`chroma_store.py`) ke peeche hai.
 2. Why chunk overlap? Chunk ki seema pe koi baat aadhi ek chunk mein aur aadhi agle mein chali jaati hai. Overlap se wo baat kam se kam ek chunk mein poori rehti hai. Kharcha: thoda zyada storage aur embedding.
@@ -93,3 +104,5 @@ Write each concept in my own words after learning it. If I can't explain it here
 13. Galat chunk aaye to? Jawab galat ya NOT_FOUND aayega. Sudhaar: chunk size/overlap tune karo, k badhao, query rewriting, hybrid (keyword + vector) search, reranker, aur eval se naapo.
 14. Structured output vs tool calling? Structured output = jawab ka format fix (pakka JSON schema). Tool calling = model ek action maangta hai (function + arguments), aapka code use chalata hai aur result wapas deta hai. Structured output ek baar ka jawab, tool calling ek loop.
 15. Tool kaun chalata hai? Hamesha aapka code. Model sirf naam aur arguments deta hai. Isliye validation, permissions aur errors (`is_error: true`) aapke haath mein.
+16. Node, edge, state kya hai? State = shared data (sawaal, chunks, jawab). Node = ek function jo state padhta hai aur update lautata hai. Edge = agla node. Conditional edge = state ke hisaab se raasta (jaise intent).
+17. Ek bade prompt ki jagah graph kyun? Har step ka ek kaam (chhote, focused prompts), har node ka alag test, beech mein code se check (verifier, retries), aur naya agent jodna aasaan. Nuksaan: zyada LLM calls = zyada latency aur cost.

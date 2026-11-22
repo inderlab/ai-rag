@@ -10,6 +10,7 @@ youtube-transcript-api>=1.0
 sqlalchemy>=2.0
 sentence-transformers>=3.0
 chromadb>=1.0
+langgraph>=1.0
 
 # dev
 pytest>=8.0
@@ -17,6 +18,5 @@ ruff>=0.6
 
 # added later in the plan:
 # python-jose, passlib[bcrypt]  (auth)
-# langgraph  (Day 9)
 # faster-whisper  (uploads)
 # mcp  (Day 12)

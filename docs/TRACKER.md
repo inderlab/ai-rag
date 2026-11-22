@@ -16,7 +16,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 | 6 | 2026-11-22 | Vector DB (ChromaDB) | `chroma_store.py`, indexing pipeline (`indexing` status), `/api/search`, `/api/vectorstore/info`, reindex | ✅ | 1 | |
 | 7 | 2026-11-22 | RAG | `/api/chat` with `[mm:ss]` citations, `/api/chat/compare` (with vs without RAG) | ✅ | 1 | |
 | 8 | 2026-11-22 | Structured outputs + tools | `structured()` in both providers, VideoInsights (title, summary, chapters, tags, key points), `/api/videos/{id}/insights`, tool-calling practice | ✅ | 1 | |
-| 9 | | Agents + LangGraph | Router + retriever + answer graph | ⬜ | | |
+| 9 | 2026-11-22 | Agents + LangGraph | `agents/state.py`, `agents/router.py`, `agents/graph.py` (router → retriever → answer), `/api/agent/chat` with trace | ✅ | 1 | |
 | 10 | | Multi-agent + verifier | All agents, verifier loop, SSE | ⬜ | | |
 | 11 | | React + Vite | Library, video page, chat, quiz, model dropdown | ⬜ | | |
 | 12 | | MCP | MCP server + Claude Desktop demo | ⬜ | | |
@@ -85,6 +85,13 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 - **Problems / how I solved them:** chapters only matched chunk starts (2 chapters for a 3 min song); now the transcript has a marker every ~30 s
 - **Result:** 14 sensible chapters for the 1 hour talk, 7 for the song; tool demo shows 1 call, 2 parallel calls, and no call when not needed
 - **Tomorrow:** Day 9 — LangGraph basics: router + retriever + answer graph
+
+### Day 9 — 2026-11-22
+- **Learned:** agent, LangGraph state / nodes / edges / conditional edges, reducers (`operator.add`)
+- **Built:** `AgentState`, router agent (structured `RouteDecision`), graph router → retriever → answer, `POST /api/agent/chat` (intent, reason, steps, tokens), `learn/day09_graph.py`
+- **Problems / how I solved them:** a router answer of `qa` with no open video can't retrieve one video, so it is turned into `search_library`
+- **Result:** 4/4 live questions routed correctly (qa, summary, quiz, search_library)
+- **Tomorrow:** Day 10 — summarizer, quiz, library search, verifier loop, SSE streaming
 
 ---
 

@@ -76,3 +76,12 @@ MERGE_SYSTEM = """You get partial insights from consecutive parts of one long vi
 Merge them into one set of insights for the whole video, following the same rules:
 one title, one 3-5 sentence summary, 3-12 chapters in time order using the given start times,
 5-10 tags and 3-6 key points."""
+
+
+ROUTER_SYSTEM = """You route a user's message in a "chat with your videos" app.
+Pick exactly one intent:
+- qa: a question about what is said or shown in the current video.
+- summary: asks for a summary, overview, main points, chapters or "what is this video about".
+- search_library: asks which video / where across all videos talks about something.
+- quiz: asks for a quiz, MCQs, test questions, flashcards or study notes.
+The message can be English, Hindi or Hinglish. Give a short reason."""
