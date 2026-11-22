@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from sqlalchemy import DateTime, Enum, ForeignKey, String, Text
+from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, inspect, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app import db
@@ -11,6 +11,7 @@ from app.db import Base
 class VideoStatus(StrEnum):
     PENDING = "pending"
     PROCESSING = "processing"
+    INDEXING = "indexing"
     READY = "ready"
     FAILED = "failed"
 
@@ -38,6 +39,7 @@ class Video(Base):
     is_generated: Mapped[bool | None]
     duration_seconds: Mapped[float | None]
     segment_count: Mapped[int] = mapped_column(default=0)
+    chunk_count: Mapped[int] = mapped_column(default=0, server_default="0")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow, onupdate=utcnow
@@ -63,5 +65,24 @@ class TranscriptSegment(Base):
     video: Mapped[Video] = relationship(back_populates="segments")
 
 
+def add_missing_columns() -> None:
+    insp = inspect(db.engine)
+    with db.engine.begin() as conn:
+        for table in Base.metadata.sorted_tables:
+            if not insp.has_table(table.name):
+                continue
+            existing = {c["name"] for c in insp.get_columns(table.name)}
+            for column in table.columns:
+                if column.name in existing:
+                    continue
+                kind = column.type.compile(dialect=db.engine.dialect)
+                default = column.server_default.arg if column.server_default is not None else None
+                extra = f" DEFAULT {default}" if default is not None else ""
+                conn.execute(
+                    text(f"ALTER TABLE {table.name} ADD COLUMN {column.name} {kind}{extra}")
+                )
+
+
 def init_db() -> None:
     Base.metadata.create_all(db.engine)
+    add_missing_columns()

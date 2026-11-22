@@ -1,12 +1,44 @@
 import logging
 
 from sqlalchemy import delete
+from sqlalchemy.orm import Session
 
 from app import db
+from app.config import settings
 from app.ingestion import youtube
+from app.ingestion.chunker import chunk_segments
 from app.models import TranscriptSegment, Video, VideoStatus
+from app.vectorstore.chroma_store import get_store
 
 log = logging.getLogger(__name__)
+
+
+def index_video(video: Video) -> int:
+    segments = sorted(video.segments, key=lambda s: s.position)
+    chunks = chunk_segments(
+        [{"text": s.text, "start": s.start, "end": s.end} for s in segments],
+        settings.CHUNK_MAX_WORDS,
+        settings.CHUNK_OVERLAP_WORDS,
+    )
+    count = get_store().add_chunks(video.id, chunks, title=video.title or "")
+    video.chunk_count = count
+    return count
+
+
+def run_indexing(session: Session, video: Video) -> bool:
+    video.status = VideoStatus.INDEXING
+    session.commit()
+    try:
+        index_video(video)
+    except Exception as e:
+        log.exception("indexing failed for video %s", video.id)
+        video.status = VideoStatus.FAILED
+        video.error = f"Indexing failed: {e}"[:500]
+        session.commit()
+        return False
+    video.status = VideoStatus.READY
+    session.commit()
+    return True
 
 
 def ingest_video(video_id: int) -> None:
@@ -51,5 +83,15 @@ def ingest_video(video_id: int) -> None:
         video.is_generated = captions.is_generated
         video.segment_count = len(captions.segments)
         video.duration_seconds = captions.segments[-1]["end"]
-        video.status = VideoStatus.READY
         session.commit()
+        session.refresh(video)
+
+        run_indexing(session, video)
+
+
+def reindex_video(video_id: int) -> None:
+    with db.SessionLocal() as session:
+        video = session.get(Video, video_id)
+        if video is None or not video.segments:
+            return
+        run_indexing(session, video)

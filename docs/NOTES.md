@@ -46,8 +46,16 @@ Write each concept in my own words after learning it. If I can't explain it here
 - Rule of thumb: video ke liye 250-400 words + 10-20% overlap. Asli size eval se tay hoga (Day 13).
 
 ## Day 6 — Vector DB
-- Vector DB vs SQL:
-- HNSW:
+- Vector DB vs SQL: SQL exact match dhoondhta hai (`WHERE title = 'Docker'`). Vector DB "matlab mein sabse paas" wale top-k dhoondhta hai. Hum dono use karte hain: SQLite mein videos aur status, Chroma mein chunk vectors.
+- HNSW: vectors ka ek graph jisme har vector apne kuch paas wale padosiyon se juda hota hai. Search upar ki layer se shuru hoke padosiyon pe kood-kood ke paas pahunchta hai. Har vector se compare nahi karna padta, isliye lakhon vectors mein bhi fast (approximate, par lagbhag hamesha sahi).
+- Chroma mein: collection (table jaisa), ids (`video_id:position`), documents (chunk text), embeddings (humne khud e5 se banaye), metadatas (`video_id`, `start`, `end`, `title`), aur `where={"video_id": 1}` filter.
+- Distance vs score: collection `cosine` pe hai, Chroma distance = 1 - cosine deta hai. Hum `score = 1 - distance` dikhate hain.
+- Same-model rule ko code mein pakka kiya: collection ke metadata mein `embedding_model` save hai. Model badla to app error deta hai, chupchaap galat results nahi.
+- Indexing pipeline: transcript → chunks (300 words, 50 overlap) → embed → Chroma → status `ready`. Naya status `indexing` beech mein aata hai.
+- My test (`learn/day06_chroma.py`): "database se data kaise nikaalein" ka top result "JPA repository se database query likho" (distance 0.093). `where={"topic": "java"}` se sirf java wale aaye.
+- My test (live): 2 videos (Rick Astley 2 chunks, 1 ghante ka LLM talk 49 chunks). Library search "jailbreak attacks on LLM security" ne 47:28, 50:07, 57:34 laaye. Server restart ke baad bhi vectors bache rahe. Cached model ke saath search ~20-200 ms.
+- Bug: do videos ek saath add kiye to dono background threads ne ek saath Chroma client banaya aur indexing fail hui. Lock lagaya (store aur model dono pe), ab theek hai.
+- ChromaDB vs pgvector: Chroma = alag, simple, Python-native, chhote/medium projects. pgvector = Postgres ke andar, SQL join + vector search ek jagah, already Postgres hai to best. Qdrant/Pinecone = bade scale, managed.
 
 ## Day 7 — RAG
 - R:
@@ -56,7 +64,7 @@ Write each concept in my own words after learning it. If I can't explain it here
 - Without RAG vs with RAG (my test result):
 
 ## Interview answers (practice)
-1. Why ChromaDB?
+1. Why ChromaDB? Local, free, Python se seedha chalta hai, disk pe save hota hai (PersistentClient), metadata filter (`where`) deta hai. Is size ke project ke liye alag server nahi chahiye. Scale badhe to pgvector ya Qdrant pe ja sakte hain, kyunki store ek wrapper (`chroma_store.py`) ke peeche hai.
 2. Why chunk overlap? Chunk ki seema pe koi baat aadhi ek chunk mein aur aadhi agle mein chali jaati hai. Overlap se wo baat kam se kam ek chunk mein poori rehti hai. Kharcha: thoda zyada storage aur embedding.
 3. How did I reduce hallucinations?
 4. Keyword search vs semantic search? Keyword search exact shabd dhoondta hai ("database" likha hai to milega). Semantic search matlab dhoondta hai ("DB connect" ≈ "datasource URL set karo"). Best result dono ko milake milta hai (hybrid search).
@@ -64,3 +72,5 @@ Write each concept in my own words after learning it. If I can't explain it here
 6. Model badal diya to kya karna padega? Saara data dobara embed karna padega, kyunki purane aur naye vectors compare nahi ho sakte.
 7. Chunk size ka search pe asar? Chhote chunks = exact match par context kam, LLM ko adhoora jawab. Bade chunks = context zyada par ek vector mein kai topics, ranking dhundhli aur prompt mein tokens zyada. Isliye beech ka size aur eval se tune.
 8. Chunking ke tareeke? Fixed size (words/tokens), sentence/segment boundary pe, recursive (paragraph → sentence → word), semantic (matlab badle wahan todo). Video ke liye segment boundary + time metadata best hai.
+9. Vector DB aur SQL DB mein farak? SQL exact values aur joins ke liye, vector DB similarity (top-k paas wale vectors) ke liye. Vector DB HNSW jaise index se approximate nearest neighbour fast dhoondhta hai.
+10. HNSW kya hai? Padosiyon ka multi-layer graph. Upar ki layer mein lambi chhalaang, neeche ki layer mein chhoti. Har vector se compare kiye bina paas wale mil jaate hain.

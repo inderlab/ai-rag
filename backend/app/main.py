@@ -8,14 +8,20 @@ from sqlalchemy import update
 from app import db
 from app.config import settings
 from app.models import Video, VideoStatus, init_db
-from app.routers import chunks, embeddings, health, llm, prompting, transcript, videos
+from app.routers import chunks, embeddings, health, llm, prompting, search, transcript, videos
+
+ACTIVE = [VideoStatus.PENDING, VideoStatus.PROCESSING, VideoStatus.INDEXING]
 
 
 def recover_interrupted_jobs() -> None:
     with db.SessionLocal() as session:
         session.execute(
             update(Video)
-            .where(Video.status.in_([VideoStatus.PENDING, VideoStatus.PROCESSING]))
+            .where(
+                Video.status.in_(
+                    [VideoStatus.PENDING, VideoStatus.PROCESSING, VideoStatus.INDEXING]
+                )
+            )
             .values(status=VideoStatus.FAILED, error="Server restarted during processing, retry")
         )
         session.commit()
@@ -45,3 +51,4 @@ app.include_router(transcript.router, prefix="/api")
 app.include_router(videos.router, prefix="/api")
 app.include_router(embeddings.router, prefix="/api")
 app.include_router(chunks.router, prefix="/api")
+app.include_router(search.router, prefix="/api")

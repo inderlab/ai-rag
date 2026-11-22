@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     CHUNK_MAX_WORDS: int = 300
     CHUNK_OVERLAP_WORDS: int = 50
 
+    CHROMA_DIR: str = str(BACKEND_DIR / "data" / "chroma")
+    CHROMA_COLLECTION: str = "vidmind_chunks"
+    SEARCH_K: int = 6
+
     DATABASE_URL: str = f"sqlite:///{BACKEND_DIR / 'data' / 'vidmind.db'}"
 
     @property

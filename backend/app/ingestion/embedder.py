@@ -39,6 +39,7 @@ class SentenceTransformerModel:
 
 
 _override: EmbeddingModel | None = None
+_init_lock = threading.Lock()
 
 
 @lru_cache
@@ -47,12 +48,19 @@ def _default_model() -> EmbeddingModel:
 
 
 def get_model() -> EmbeddingModel:
-    return _override or _default_model()
+    if _override is not None:
+        return _override
+    with _init_lock:
+        return _default_model()
 
 
 def set_model(model: EmbeddingModel | None) -> None:
     global _override
     _override = model
+
+
+def model_name() -> str:
+    return _override.name if _override is not None else settings.EMBEDDING_MODEL
 
 
 def is_loaded() -> bool:

@@ -13,7 +13,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 | 3 | 2026-11-13 | Transcript + Whisper | YouTube captions, Video + Segment tables, background job, `/api/videos` | ✅ | 1 | |
 | 4 | 2026-11-16 | Embeddings | `embedder.py` (multilingual-e5-small, 384 dim), `/api/embeddings`, similarity, semantic search on a video | ✅ | 1 | |
 | 5 | 2026-11-17 | Chunking | `chunker.py` (segment-aware, overlap, timestamps), `/api/chunks/preview`, `/api/videos/{id}/chunks`, compare sizes, chunk search | ✅ | 1 | |
-| 6 | | Vector DB (ChromaDB) | `chroma_store.py`, indexing pipeline, `/api/search` | ⬜ | | |
+| 6 | 2026-11-22 | Vector DB (ChromaDB) | `chroma_store.py`, indexing pipeline (`indexing` status), `/api/search`, `/api/vectorstore/info`, reindex | ✅ | 1 | |
 | 7 | | RAG | `/api/chat` with `[mm:ss]` citations | ⬜ | | |
 | 8 | | Structured outputs + tools | Title, summary, chapters, tags | ⬜ | | |
 | 9 | | Agents + LangGraph | Router + retriever + answer graph | ⬜ | | |
@@ -64,6 +64,13 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 - **Problems / how I solved them:** YouTube gave a temporary 502 and the saved error only showed "most likely caused by:", so `friendly_error` now shows the real cause line; retry worked
 - **Result:** 487-word video → 6 / 2 / 1 chunks for 100 / 300 / 800 words; Hinglish query now finds the right chorus chunk; embedding 6 chunks 395 ms vs 61 segments 920 ms
 - **Tomorrow:** Day 6 — ChromaDB, save chunk vectors once instead of embedding on every search
+
+### Day 6 — 2026-11-22
+- **Learned:** vector DB vs SQL, HNSW, collection / ids / documents / metadatas / where, distance = 1 - cosine, Chroma vs pgvector
+- **Built:** `app/vectorstore/chroma_store.py` (`add_chunks`, `search`, `delete_video`, `count`, model check), indexing after transcript, `GET /api/search?q=&video_id=&k=`, `GET /api/vectorstore/info`, `POST /api/videos/{id}/reindex`, `chunk_count` column with auto-migration
+- **Problems / how I solved them:** two videos added together made two threads open Chroma at once and indexing failed; added an init lock for the store and the model
+- **Result:** 2 real videos, 51 chunks; library search finds the right minutes in a 1 hour talk; vectors survive restart
+- **Tomorrow:** Day 7 — RAG chat with `[mm:ss]` citations
 
 ---
 

@@ -9,7 +9,8 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.ingestion.youtube import extract_video_id, fmt_ts
 from app.models import TranscriptSegment, Video, VideoStatus
-from app.services.ingest import ingest_video
+from app.services.ingest import ingest_video, reindex_video
+from app.vectorstore.chroma_store import get_store
 
 router = APIRouter(prefix="/videos", tags=["videos"])
 
@@ -31,6 +32,7 @@ class VideoOut(BaseModel):
     language: str | None
     is_generated: bool | None
     segment_count: int
+    chunk_count: int
     duration_seconds: float | None
     duration: str | None
     thumbnail_url: str
@@ -66,6 +68,7 @@ def to_out(video: Video) -> VideoOut:
         language=video.language,
         is_generated=video.is_generated,
         segment_count=video.segment_count,
+        chunk_count=video.chunk_count or 0,
         duration_seconds=video.duration_seconds,
         duration=fmt_ts(video.duration_seconds) if video.duration_seconds else None,
         thumbnail_url=f"https://i.ytimg.com/vi/{video.youtube_id}/hqdefault.jpg",
@@ -175,8 +178,19 @@ def retry_video(video_id: int, background: BackgroundTasks, session: DbSession) 
     return to_out(video)
 
 
+@router.post("/{video_id}/reindex", response_model=VideoOut, status_code=status.HTTP_202_ACCEPTED)
+def reindex(video_id: int, background: BackgroundTasks, session: DbSession) -> VideoOut:
+    video = get_video_or_404(video_id, session)
+    if video.status not in (VideoStatus.READY, VideoStatus.FAILED) or not video.segment_count:
+        raise HTTPException(status_code=409, detail="Video needs a saved transcript to re-index")
+    background.add_task(reindex_video, video.id)
+    return to_out(video)
+
+
 @router.delete("/{video_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_video(video_id: int, session: DbSession) -> Response:
-    session.delete(get_video_or_404(video_id, session))
+    video = get_video_or_404(video_id, session)
+    get_store().delete_video(video.id)
+    session.delete(video)
     session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
