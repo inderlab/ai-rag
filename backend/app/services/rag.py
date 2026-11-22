@@ -1,12 +1,13 @@
 import logging
 import re
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from app.config import settings
 from app.ingestion.youtube import fmt_ts
 from app.llm.base import LLMProvider
-from app.llm.prompts import NO_RAG_SYSTEM, NOT_FOUND, NOT_FOUND_REPLY, RAG_SYSTEM
+from app.llm.prompts import LIBRARY_NOTE, NO_RAG_SYSTEM, NOT_FOUND, NOT_FOUND_REPLY, RAG_SYSTEM
 from app.vectorstore.chroma_store import Hit, get_store
 
 log = logging.getLogger(__name__)
@@ -44,18 +45,20 @@ def find_citations(text: str) -> list[str]:
     return seen
 
 
-def build_context(hits: list[Hit]) -> str:
+def build_context(hits: list[Hit], with_titles: bool = True) -> str:
     blocks = []
     for hit in hits:
         header = f"[{fmt_ts(hit.start)}] (until {fmt_ts(hit.end)})"
-        if hit.title:
+        if hit.title and with_titles:
             header += f" from video '{hit.title}'"
         blocks.append(f"{header}\n{hit.text}")
     return "<context>\n" + "\n\n".join(blocks) + "\n</context>"
 
 
-def build_messages(question: str, hits: list[Hit], history: list[dict]) -> list[dict]:
-    prompt = f"{build_context(hits)}\n\nQuestion: {question}"
+def build_messages(
+    question: str, hits: list[Hit], history: list[dict], with_titles: bool = True
+) -> list[dict]:
+    prompt = f"{build_context(hits, with_titles)}\n\nQuestion: {question}"
     return [*history, {"role": "user", "content": prompt}]
 
 
@@ -64,33 +67,51 @@ def retrieve(question: str, video_id: int | None, k: int) -> list[Hit]:
 
 
 def generate(
-    llm: LLMProvider, question: str, hits: list[Hit], history: list[dict] | None = None
+    llm: LLMProvider,
+    question: str,
+    hits: list[Hit],
+    history: list[dict] | None = None,
+    feedback: str | None = None,
+    on_token: Callable[[str], None] | None = None,
+    library: bool | None = None,
 ) -> Answer:
     if not hits:
         return Answer(NOT_FOUND_REPLY, [], [], llm.name, llm.model, found=False)
+    if library is None:
+        library = len({h.video_id for h in hits}) > 1
+    system = RAG_SYSTEM + (f"\n\n{LIBRARY_NOTE}" if library else "")
+    if feedback:
+        system += f"\n\nYour previous answer had problems, fix them: {feedback}"
+    messages = build_messages(question, hits, history or [], with_titles=library)
     start = time.perf_counter()
-    result = llm.complete(
-        RAG_SYSTEM, build_messages(question, hits, history or []), RAG_TEMPERATURE
-    )
+    if on_token is None:
+        result = llm.complete(system, messages, RAG_TEMPERATURE)
+        raw, tokens_in, tokens_out = result.text, result.input_tokens, result.output_tokens
+    else:
+        parts = []
+        for piece in llm.stream(system, messages, RAG_TEMPERATURE):
+            parts.append(piece)
+            on_token(piece)
+        raw, tokens_in, tokens_out = "".join(parts), 0, 0
     latency = int((time.perf_counter() - start) * 1000)
     log.info(
         "rag provider=%s model=%s in=%s out=%s ms=%s",
         llm.name,
         llm.model,
-        result.input_tokens,
-        result.output_tokens,
+        tokens_in,
+        tokens_out,
         latency,
     )
-    found = NOT_FOUND not in result.text
-    text = result.text.strip() if found else NOT_FOUND_REPLY
+    found = NOT_FOUND not in raw
+    text = raw.strip() if found else NOT_FOUND_REPLY
     return Answer(
         text=text,
         citations=find_citations(text),
         sources=hits,
         provider=llm.name,
         model=llm.model,
-        input_tokens=result.input_tokens,
-        output_tokens=result.output_tokens,
+        input_tokens=tokens_in,
+        output_tokens=tokens_out,
         latency_ms=latency,
         found=found,
     )

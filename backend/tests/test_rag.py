@@ -52,6 +52,7 @@ def test_find_citations_and_seconds():
 def test_context_has_timestamps_and_title():
     hits = [Hit(1, 0, 252.0, 260.0, "database url", 0.9, "Spring")]
     context = rag.build_context(hits)
+    assert "from video" not in rag.build_context(hits, with_titles=False)
     assert context.startswith("<context>")
     assert "[04:12] (until 04:20) from video 'Spring'" in context
     assert "database url" in context
@@ -60,7 +61,8 @@ def test_context_has_timestamps_and_title():
 def test_chat_uses_retrieved_chunks(client, llm):
     llm.replies = ["Database URL properties file mein set karo [04:12]."]
     r = client.post(
-        "/api/chat", json={"question": "database url kahan set karein", "video_id": client.video_id}
+        "/api/chat/rag",
+        json={"question": "database url kahan set karein", "video_id": client.video_id},
     )
     data = r.json()
     assert r.status_code == 200
@@ -76,7 +78,7 @@ def test_chat_uses_retrieved_chunks(client, llm):
 def test_chat_not_found(client, llm):
     llm.replies = ["NOT_FOUND"]
     data = client.post(
-        "/api/chat", json={"question": "kubernetes kya hai", "video_id": client.video_id}
+        "/api/chat/rag", json={"question": "kubernetes kya hai", "video_id": client.video_id}
     ).json()
     assert data["found"] is False
     assert data["citations"] == []
@@ -89,7 +91,7 @@ def test_chat_keeps_history(client, llm):
         {"role": "assistant", "content": "Spring Boot [00:00]"},
     ]
     client.post(
-        "/api/chat",
+        "/api/chat/rag",
         json={"question": "aur database?", "video_id": client.video_id, "history": history},
     )
     assert llm.calls[0]["messages"][:2] == history
@@ -97,14 +99,15 @@ def test_chat_keeps_history(client, llm):
 
 def test_chat_errors(client, llm, monkeypatch):
     assert (
-        client.post("/api/chat", json={"question": "hi there", "video_id": 99}).status_code == 404
+        client.post("/api/chat/rag", json={"question": "hi there", "video_id": 99}).status_code
+        == 404
     )
 
     def broken(*args, **kwargs):
         raise RuntimeError("rate limit")
 
     monkeypatch.setattr(llm, "complete", broken)
-    r = client.post("/api/chat", json={"question": "database", "video_id": client.video_id})
+    r = client.post("/api/chat/rag", json={"question": "database", "video_id": client.video_id})
     assert r.status_code == 502
 
 
@@ -113,7 +116,7 @@ def test_chat_bad_provider(client, monkeypatch):
         raise ValueError("Unknown LLM provider 'x'")
 
     monkeypatch.setattr(chat_router, "get_llm", bad)
-    r = client.post("/api/chat", json={"question": "database", "provider": "x"})
+    r = client.post("/api/chat/rag", json={"question": "database", "provider": "x"})
     assert r.status_code == 400
 
 

@@ -9,7 +9,6 @@ from app import db
 from app.config import settings
 from app.models import Video, VideoStatus, init_db
 from app.routers import (
-    agent,
     chat,
     chunks,
     embeddings,
@@ -66,4 +65,3 @@ app.include_router(chunks.router, prefix="/api")
 app.include_router(search.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
 app.include_router(insights.router, prefix="/api")
-app.include_router(agent.router, prefix="/api")

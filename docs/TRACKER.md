@@ -17,7 +17,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 | 7 | 2026-11-22 | RAG | `/api/chat` with `[mm:ss]` citations, `/api/chat/compare` (with vs without RAG) | ✅ | 1 | |
 | 8 | 2026-11-22 | Structured outputs + tools | `structured()` in both providers, VideoInsights (title, summary, chapters, tags, key points), `/api/videos/{id}/insights`, tool-calling practice | ✅ | 1 | |
 | 9 | 2026-11-22 | Agents + LangGraph | `agents/state.py`, `agents/router.py`, `agents/graph.py` (router → retriever → answer), `/api/agent/chat` with trace | ✅ | 1 | |
-| 10 | | Multi-agent + verifier | All agents, verifier loop, SSE | ⬜ | | |
+| 10 | 2026-11-22 | Multi-agent + verifier | summarizer, quiz, library search, verifier retry loop, query rewrite, `/api/chat` on the graph, `/api/chat/stream` (SSE) | ✅ | 1 | |
 | 11 | | React + Vite | Library, video page, chat, quiz, model dropdown | ⬜ | | |
 | 12 | | MCP | MCP server + Claude Desktop demo | ⬜ | | |
 | 13 | | Eval + n8n | Eval script, n8n workflows | ⬜ | | |
@@ -92,6 +92,13 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 - **Problems / how I solved them:** a router answer of `qa` with no open video can't retrieve one video, so it is turned into `search_library`
 - **Result:** 4/4 live questions routed correctly (qa, summary, quiz, search_library)
 - **Tomorrow:** Day 10 — summarizer, quiz, library search, verifier loop, SSE streaming
+
+### Day 10 — 2026-11-22
+- **Learned:** one job per agent, verifier with retry, query rewriting, streaming tokens out of a LangGraph node
+- **Built:** `agents/specialists.py` (summarizer, quiz), `agents/verifier.py`, full graph in `agents/graph.py`, router `search_query`, `POST /api/chat` (agent), `POST /api/chat/stream` (SSE: start/step/token/retry/done/error), `POST /api/chat/rag` (plain RAG), `learn/day10_agents.py`
+- **Problems / how I solved them:** single-video answers added an extra "Video: ..." line, so titles and the library note are only sent for library search; stripped citations left double spaces, fixed
+- **Result:** verifier catches a fake `[12:00]`; warm stream first token 4.2 s, done 5.2 s; summary / quiz / library paths work live
+- **Tomorrow:** Day 11 — React frontend
 
 ---
 

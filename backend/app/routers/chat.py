@@ -1,10 +1,15 @@
+import json
 import logging
-from typing import Annotated, Literal
+import time
+from collections.abc import Iterator
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.agents import graph
 from app.config import settings
 from app.db import get_db
 from app.ingestion.youtube import fmt_ts
@@ -63,6 +68,17 @@ class ChatResponse(BaseModel):
     output_tokens: int
     retrieval_ms: int
     llm_ms: int
+
+
+class AgentChatResponse(ChatResponse):
+    intent: str
+    route_reason: str
+    search_query: str
+    steps: list[str]
+    verified: bool
+    verify_notes: list[str]
+    quiz: dict[str, Any] | None = None
+    latency_ms: int
 
 
 class CompareRequest(BaseModel):
@@ -144,7 +160,94 @@ def side(answer: rag.Answer) -> CompareSide:
     )
 
 
-@router.post("", response_model=ChatResponse)
+def from_state(body: ChatRequest, llm: LLMProvider, state: dict, latency: int) -> AgentChatResponse:
+    answer = rag.Answer(
+        text=state.get("answer", ""),
+        citations=state.get("citations", []),
+        sources=state.get("chunks", []),
+        provider=llm.name,
+        model=llm.model,
+        found=state.get("found", True),
+    )
+    return AgentChatResponse(
+        question=body.question,
+        video_id=body.video_id,
+        answer=answer.text,
+        found=answer.found,
+        citations=citations(answer),
+        sources=sources(answer),
+        provider=llm.name,
+        model=llm.model,
+        input_tokens=state.get("input_tokens", 0),
+        output_tokens=state.get("output_tokens", 0),
+        retrieval_ms=0,
+        llm_ms=0,
+        intent=state.get("intent", ""),
+        route_reason=state.get("route_reason", ""),
+        search_query=state.get("search_query", ""),
+        steps=state.get("steps", []),
+        verified=state.get("verified", False),
+        verify_notes=state.get("verify_notes", []),
+        quiz=(state.get("extra") or {}).get("quiz"),
+        latency_ms=latency,
+    )
+
+
+def history_of(body: ChatRequest) -> list[dict]:
+    return [m.model_dump() for m in body.history]
+
+
+def sse(data: dict) -> str:
+    return f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
+
+
+@router.post("", response_model=AgentChatResponse)
+def chat(body: ChatRequest, session: DbSession) -> AgentChatResponse:
+    check_video(session, body.video_id)
+    llm = resolve(body.provider)
+    start = time.perf_counter()
+    try:
+        state = graph.run(llm, body.question, body.video_id, k=body.k, history=history_of(body))
+    except Exception as e:
+        log.exception("agent chat failed with %s", llm.name)
+        raise HTTPException(status_code=502, detail=f"{llm.name} call failed: {e}") from e
+    return from_state(body, llm, state, int((time.perf_counter() - start) * 1000))
+
+
+@router.post("/stream")
+def chat_stream(body: ChatRequest, session: DbSession) -> StreamingResponse:
+    check_video(session, body.video_id)
+    llm = resolve(body.provider)
+
+    def events() -> Iterator[str]:
+        start = time.perf_counter()
+        yield sse({"type": "start", "provider": llm.name, "model": llm.model})
+        try:
+            for kind, data in graph.stream(
+                llm, body.question, body.video_id, k=body.k, history=history_of(body)
+            ):
+                if kind == "custom" and "token" in data:
+                    yield sse({"type": "token", "text": data["token"]})
+                elif kind == "custom" and "retry" in data:
+                    yield sse({"type": "retry", "notes": data["retry"]})
+                elif kind == "node":
+                    yield sse({"type": "step", **data})
+                elif kind == "final":
+                    latency = int((time.perf_counter() - start) * 1000)
+                    final = from_state(body, llm, data, latency)
+                    yield sse({"type": "done", "result": final.model_dump()})
+        except Exception as e:
+            log.exception("agent stream failed with %s", llm.name)
+            yield sse({"type": "error", "detail": f"{llm.name} call failed: {e}"})
+
+    return StreamingResponse(
+        events(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+@router.post("/rag", response_model=ChatResponse)
 def chat_rag(body: ChatRequest, session: DbSession) -> ChatResponse:
     check_video(session, body.video_id)
     llm = resolve(body.provider)

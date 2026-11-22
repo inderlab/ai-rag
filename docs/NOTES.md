@@ -88,6 +88,18 @@ Write each concept in my own words after learning it. If I can't explain it here
 - Abhi har intent retriever + answer se hi jaata hai. Day 10 mein har intent ka apna agent aur verifier.
 - Kharcha: router ek extra LLM call hai (~1-3 s). Graph ka fayda: har step alag, test karna aasaan, naya step jodna aasaan.
 
+## Day 10 — Multi-agent + verifier
+- Graph: router → (qa: retriever → answer → verifier) / (search_library: library_search → answer → verifier) / (summary: summarizer) / (quiz: quiz). Verifier fail hua to answer ek baar dobara (feedback ke saath), phir bhi galat to galat timestamps hata deta hai.
+- Har agent ka ek kaam: Router (intent + query rewrite), Retriever (ek video), Library Search (saari videos), Answer (RAG), Summarizer (saved insights se, nahi hai to banata hai), Quiz (MCQ + notes, structured), Verifier (code, LLM nahi).
+- Verifier kaise decide karta hai: jawab ke har `[mm:ss]` ko seconds mein badlo, dekho kisi retrieved chunk ke `start-2s ... end+2s` ke andar hai ya nahi. Koi citation hi nahi hai to bhi retry. NOT_FOUND pe check nahi.
+- Query rewriting router ke structured output mein hi (`search_query`), alag LLM call nahi. "DB ka url kidhar daalna hai bhai?" jaisa sawaal saaf keywords mein badal jaata hai.
+- Streaming: `POST /api/chat/stream` (SSE). Events: `start`, `step` (har node ke baad), `token` (answer ke shabd, LangGraph `get_stream_writer` se), `retry`, `done` (poora result), `error`.
+- My test (`learn/day10_agents.py`): galat `[12:00]` wala jawab → `verifier:retry` → phir bhi galat to `[12:00]` hata diya, `[03:41]` rakha. Bina citation wala jawab bhi pakda gaya.
+- My test (live, warm server): router 1.6 s, retriever 2.3 s, pehla token 4.2 s, done 5.2 s. Cold start (server restart ke baad) ~50 s, kyunki embedding model load hota hai.
+- Summary 2 s (saved insights), quiz 3 MCQ ~16 s, library search sahi video + [51:23].
+- `POST /api/chat` ab agent graph chalata hai. Purana seedha RAG `POST /api/chat/rag` pe hai.
+- Fayda vs nuksaan: har agent chhota aur testable, verifier galat citation pakadta hai. Par router + retry = zyada LLM calls, zyada latency aur cost.
+
 ## Interview answers (practice)
 1. Why ChromaDB? Local, free, Python se seedha chalta hai, disk pe save hota hai (PersistentClient), metadata filter (`where`) deta hai. Is size ke project ke liye alag server nahi chahiye. Scale badhe to pgvector ya Qdrant pe ja sakte hain, kyunki store ek wrapper (`chroma_store.py`) ke peeche hai.
 2. Why chunk overlap? Chunk ki seema pe koi baat aadhi ek chunk mein aur aadhi agle mein chali jaati hai. Overlap se wo baat kam se kam ek chunk mein poori rehti hai. Kharcha: thoda zyada storage aur embedding.
@@ -106,3 +118,5 @@ Write each concept in my own words after learning it. If I can't explain it here
 15. Tool kaun chalata hai? Hamesha aapka code. Model sirf naam aur arguments deta hai. Isliye validation, permissions aur errors (`is_error: true`) aapke haath mein.
 16. Node, edge, state kya hai? State = shared data (sawaal, chunks, jawab). Node = ek function jo state padhta hai aur update lautata hai. Edge = agla node. Conditional edge = state ke hisaab se raasta (jaise intent).
 17. Ek bade prompt ki jagah graph kyun? Har step ka ek kaam (chhote, focused prompts), har node ka alag test, beech mein code se check (verifier, retries), aur naya agent jodna aasaan. Nuksaan: zyada LLM calls = zyada latency aur cost.
+18. Multi-agent ka fayda aur nuksaan? Fayda: har agent ka chhota prompt aur ek kaam, alag test, alag model chun sakte ho, verifier jaisa check beech mein. Nuksaan: zyada calls (router + answer + retry) = zyada latency aur cost, debug mein zyada steps. Isliye trace (`steps`) aur tokens log karte hain.
+19. Verifier kaise decide karta hai? Regex se `[mm:ss]` nikalo, seconds mein badlo, check karo ki kisi retrieved chunk ke time range (±2 s) mein hai. Galat ho ya citation na ho to feedback ke saath ek retry, phir bhi galat to galat timestamp hata do. Ye code hai, LLM nahi, isliye sasta aur pakka.

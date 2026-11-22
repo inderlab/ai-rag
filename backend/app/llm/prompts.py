@@ -54,6 +54,10 @@ Rules:
 4. Reply in the same language and style as the question (English, Hindi or Hinglish).
 5. Keep it short: 2-5 sentences or a few bullet points."""
 
+LIBRARY_NOTE = """The excerpts come from different videos in the user's library. Name the video
+title for each fact, and if the user asks which video covers something, list the matching
+videos with their best timestamps."""
+
 NO_RAG_SYSTEM = """You are a helpful assistant. Answer the question about the video named below
 in 2-5 sentences."""
 
@@ -84,4 +88,15 @@ Pick exactly one intent:
 - summary: asks for a summary, overview, main points, chapters or "what is this video about".
 - search_library: asks which video / where across all videos talks about something.
 - quiz: asks for a quiz, MCQs, test questions, flashcards or study notes.
-The message can be English, Hindi or Hinglish. Give a short reason."""
+The message can be English, Hindi or Hinglish. Give a short reason (one sentence).
+Also write search_query: a short, clean search query for the transcript in plain words,
+keeping the important keywords from the message (translate Hinglish words to English, drop
+filler like "batao", "kya hai", "please")."""
+
+QUIZ_SYSTEM = """You write a quiz from a timestamped video transcript.
+- Make as many multiple-choice questions as the user asks for (default 5, max 10).
+- Each question has exactly 4 options and one correct answer (answer = index 0-3).
+- timestamp: the [mm:ss] marker where the answer is explained, copied from the transcript.
+- explanation: one sentence on why the answer is right.
+- notes: 3-6 short study notes.
+Write in the same language as the user's request. Use only the transcript."""
