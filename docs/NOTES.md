@@ -58,15 +58,18 @@ Write each concept in my own words after learning it. If I can't explain it here
 - ChromaDB vs pgvector: Chroma = alag, simple, Python-native, chhote/medium projects. pgvector = Postgres ke andar, SQL join + vector search ek jagah, already Postgres hai to best. Qdrant/Pinecone = bade scale, managed.
 
 ## Day 7 — RAG
-- R:
-- A:
-- G:
-- Without RAG vs with RAG (my test result):
+- R (Retrieve): sawaal ka embedding (`query:` prefix) → Chroma se top-k (default 6) chunks, `where={"video_id": ...}` ke saath.
+- A (Augment): chunks ko `<context>` mein daalo, har chunk ke upar `[mm:ss] (until mm:ss)` header. Model wahi timestamp copy karta hai, isliye citation sahi aata hai.
+- G (Generate): system prompt: sirf context se jawab, har fact ke baad `[mm:ss]`, nahi mila to `NOT_FOUND`, sawaal ki bhasha mein jawab. Temperature 0.2 (Claude pe effort low).
+- Without RAG vs with RAG (my test, 1 ghante ka LLM talk, Claude haiku): talk famous hai to bina RAG bhi model ne "2 files, 140 GB" bataya, par **koi timestamp nahi** aur khud bola "my knowledge of the talk, figures may differ". RAG ke saath wahi facts `[01:17]` citation ke saath, transcript se. Kam famous ya private video pe bina RAG model ya to mana karega ya galat banayega.
+- 10 sawaal test kiye: 9 sahi jawab + timestamps (LLM OS [42:18], system 1/2 [35:18], fine-tuning [14:33], scaling laws [24:35], prompt injection [51:23], Hinglish pretraining sawaal ka Hinglish jawab [03:41] [04:55]). "2011 cricket world cup" pe sahi se NOT_FOUND.
+- Cost: har RAG sawaal ~3000 input tokens (6 chunks × ~300 words) + 150-400 output. Retrieval ~250-450 ms, LLM ~1-3 s.
+- `/api/chat/compare` dono jawab ek saath deta hai, interview demo ke liye.
 
 ## Interview answers (practice)
 1. Why ChromaDB? Local, free, Python se seedha chalta hai, disk pe save hota hai (PersistentClient), metadata filter (`where`) deta hai. Is size ke project ke liye alag server nahi chahiye. Scale badhe to pgvector ya Qdrant pe ja sakte hain, kyunki store ek wrapper (`chroma_store.py`) ke peeche hai.
 2. Why chunk overlap? Chunk ki seema pe koi baat aadhi ek chunk mein aur aadhi agle mein chali jaati hai. Overlap se wo baat kam se kam ek chunk mein poori rehti hai. Kharcha: thoda zyada storage aur embedding.
-3. How did I reduce hallucinations?
+3. How did I reduce hallucinations? (1) Sirf retrieved context se jawab ka rule, (2) har fact pe `[mm:ss]` citation, (3) jawab na mile to `NOT_FOUND` bolna allowed (aur hum use friendly message mein badalte hain), (4) low temperature / low effort, (5) Day 10 mein verifier jo check karta hai ki har timestamp kisi retrieved chunk ke andar hai.
 4. Keyword search vs semantic search? Keyword search exact shabd dhoondta hai ("database" likha hai to milega). Semantic search matlab dhoondta hai ("DB connect" ≈ "datasource URL set karo"). Best result dono ko milake milta hai (hybrid search).
 5. Embedding model kaise chunoge? Language support (Hindi chahiye to multilingual), dimension (size vs quality), speed, cost (local free vs API), aur apne data pe test karke.
 6. Model badal diya to kya karna padega? Saara data dobara embed karna padega, kyunki purane aur naye vectors compare nahi ho sakte.
@@ -74,3 +77,6 @@ Write each concept in my own words after learning it. If I can't explain it here
 8. Chunking ke tareeke? Fixed size (words/tokens), sentence/segment boundary pe, recursive (paragraph → sentence → word), semantic (matlab badle wahan todo). Video ke liye segment boundary + time metadata best hai.
 9. Vector DB aur SQL DB mein farak? SQL exact values aur joins ke liye, vector DB similarity (top-k paas wale vectors) ke liye. Vector DB HNSW jaise index se approximate nearest neighbour fast dhoondhta hai.
 10. HNSW kya hai? Padosiyon ka multi-layer graph. Upar ki layer mein lambi chhalaang, neeche ki layer mein chhoti. Har vector se compare kiye bina paas wale mil jaate hain.
+11. RAG ke 3 steps? Retrieve (vector search se top-k chunks), Augment (chunks prompt mein), Generate (LLM context se jawab + citations).
+12. RAG vs fine-tuning? RAG: naya ya private data, jaldi update, citations, sasta. Fine-tuning: style/format/behaviour sikhana, data model ke andar ghus jaata hai, update mehenga, citation nahi. Video Q&A ke liye RAG.
+13. Galat chunk aaye to? Jawab galat ya NOT_FOUND aayega. Sudhaar: chunk size/overlap tune karo, k badhao, query rewriting, hybrid (keyword + vector) search, reranker, aur eval se naapo.

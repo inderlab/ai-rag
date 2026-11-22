@@ -1,5 +1,8 @@
 import hashlib
 import math
+from collections.abc import Iterator
+
+from app.llm.base import LLMProvider, LLMResult
 
 DIM = 64
 
@@ -21,3 +24,22 @@ class FakeModel:
             norm = math.sqrt(sum(x * x for x in vec)) or 1.0
             out.append([x / norm for x in vec])
         return out
+
+
+class FakeLLM(LLMProvider):
+    name = "fake"
+    model = "fake-1"
+
+    def __init__(self, replies: list[str] | None = None):
+        self.replies = list(replies or [])
+        self.calls: list[dict] = []
+
+    def complete(self, system: str, messages: list[dict], temperature: float = 0.2) -> LLMResult:
+        self.calls.append({"system": system, "messages": messages, "temperature": temperature})
+        text = self.replies.pop(0) if self.replies else "ok"
+        return LLMResult(text=text, input_tokens=100, output_tokens=20)
+
+    def stream(self, system: str, messages: list[dict], temperature: float = 0.2) -> Iterator[str]:
+        text = self.complete(system, messages, temperature).text
+        for word in text.split(" "):
+            yield word + " "

@@ -8,7 +8,7 @@ from sqlalchemy import update
 from app import db
 from app.config import settings
 from app.models import Video, VideoStatus, init_db
-from app.routers import chunks, embeddings, health, llm, prompting, search, transcript, videos
+from app.routers import chat, chunks, embeddings, health, llm, prompting, search, transcript, videos
 
 ACTIVE = [VideoStatus.PENDING, VideoStatus.PROCESSING, VideoStatus.INDEXING]
 
@@ -52,3 +52,4 @@ app.include_router(videos.router, prefix="/api")
 app.include_router(embeddings.router, prefix="/api")
 app.include_router(chunks.router, prefix="/api")
 app.include_router(search.router, prefix="/api")
+app.include_router(chat.router, prefix="/api")

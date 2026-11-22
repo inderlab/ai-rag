@@ -1,0 +1,180 @@
+import logging
+from typing import Annotated, Literal
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
+
+from app.config import settings
+from app.db import get_db
+from app.ingestion.youtube import fmt_ts
+from app.llm.base import LLMProvider
+from app.llm.factory import get_llm
+from app.models import Video
+from app.services import rag
+from app.services.transcripts import ready_video
+
+log = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/chat", tags=["chat"])
+
+DbSession = Annotated[Session, Depends(get_db)]
+
+
+class HistoryMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=8000)
+
+
+class ChatRequest(BaseModel):
+    question: str = Field(min_length=2, max_length=1000)
+    video_id: int | None = None
+    k: int = Field(settings.SEARCH_K, ge=1, le=20)
+    provider: str | None = None
+    history: list[HistoryMessage] = Field(default_factory=list, max_length=20)
+
+
+class Citation(BaseModel):
+    timestamp: str
+    seconds: int
+
+
+class Source(BaseModel):
+    video_id: int
+    title: str
+    timestamp: str
+    end_timestamp: str
+    start: float
+    end: float
+    score: float
+    text: str
+
+
+class ChatResponse(BaseModel):
+    question: str
+    video_id: int | None
+    answer: str
+    found: bool
+    citations: list[Citation]
+    sources: list[Source]
+    provider: str
+    model: str
+    input_tokens: int
+    output_tokens: int
+    retrieval_ms: int
+    llm_ms: int
+
+
+class CompareRequest(BaseModel):
+    question: str = Field(min_length=2, max_length=1000)
+    video_id: int
+    provider: str | None = None
+
+
+class CompareSide(BaseModel):
+    answer: str
+    citations: list[Citation]
+    input_tokens: int
+    output_tokens: int
+    latency_ms: int
+
+
+class CompareResponse(BaseModel):
+    question: str
+    title: str
+    without_rag: CompareSide
+    with_rag: CompareSide
+
+
+def resolve(provider: str | None) -> LLMProvider:
+    try:
+        return get_llm(provider)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+def check_video(session: Session, video_id: int | None) -> Video | None:
+    return ready_video(session, video_id) if video_id is not None else None
+
+
+def citations(answer: rag.Answer) -> list[Citation]:
+    return [Citation(timestamp=t, seconds=rag.to_seconds(t)) for t in answer.citations]
+
+
+def sources(answer: rag.Answer) -> list[Source]:
+    return [
+        Source(
+            video_id=h.video_id,
+            title=h.title,
+            timestamp=fmt_ts(h.start),
+            end_timestamp=fmt_ts(h.end),
+            start=h.start,
+            end=h.end,
+            score=h.score,
+            text=h.text,
+        )
+        for h in answer.sources
+    ]
+
+
+def to_response(body: ChatRequest, answer: rag.Answer) -> ChatResponse:
+    return ChatResponse(
+        question=body.question,
+        video_id=body.video_id,
+        answer=answer.text,
+        found=answer.found,
+        citations=citations(answer),
+        sources=sources(answer),
+        provider=answer.provider,
+        model=answer.model,
+        input_tokens=answer.input_tokens,
+        output_tokens=answer.output_tokens,
+        retrieval_ms=answer.extra.get("retrieval_ms", 0),
+        llm_ms=answer.latency_ms,
+    )
+
+
+def side(answer: rag.Answer) -> CompareSide:
+    return CompareSide(
+        answer=answer.text,
+        citations=citations(answer),
+        input_tokens=answer.input_tokens,
+        output_tokens=answer.output_tokens,
+        latency_ms=answer.latency_ms,
+    )
+
+
+@router.post("", response_model=ChatResponse)
+def chat_rag(body: ChatRequest, session: DbSession) -> ChatResponse:
+    check_video(session, body.video_id)
+    llm = resolve(body.provider)
+    try:
+        answer = rag.ask(
+            llm,
+            body.question,
+            body.video_id,
+            body.k,
+            [m.model_dump() for m in body.history],
+        )
+    except Exception as e:
+        log.exception("chat failed with %s", llm.name)
+        raise HTTPException(status_code=502, detail=f"{llm.name} call failed: {e}") from e
+    return to_response(body, answer)
+
+
+@router.post("/compare", response_model=CompareResponse)
+def compare(body: CompareRequest, session: DbSession) -> CompareResponse:
+    video = ready_video(session, body.video_id)
+    llm = resolve(body.provider)
+    try:
+        without = rag.ask_without_rag(llm, body.question, video.title or video.youtube_id)
+        with_rag = rag.ask(llm, body.question, video.id)
+    except Exception as e:
+        log.exception("chat failed with %s", llm.name)
+        raise HTTPException(status_code=502, detail=f"{llm.name} call failed: {e}") from e
+    return CompareResponse(
+        question=body.question,
+        title=video.title or "",
+        without_rag=side(without),
+        with_rag=side(with_rag),
+    )

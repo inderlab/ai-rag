@@ -14,7 +14,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 | 4 | 2026-11-16 | Embeddings | `embedder.py` (multilingual-e5-small, 384 dim), `/api/embeddings`, similarity, semantic search on a video | ✅ | 1 | |
 | 5 | 2026-11-17 | Chunking | `chunker.py` (segment-aware, overlap, timestamps), `/api/chunks/preview`, `/api/videos/{id}/chunks`, compare sizes, chunk search | ✅ | 1 | |
 | 6 | 2026-11-22 | Vector DB (ChromaDB) | `chroma_store.py`, indexing pipeline (`indexing` status), `/api/search`, `/api/vectorstore/info`, reindex | ✅ | 1 | |
-| 7 | | RAG | `/api/chat` with `[mm:ss]` citations | ⬜ | | |
+| 7 | 2026-11-22 | RAG | `/api/chat` with `[mm:ss]` citations, `/api/chat/compare` (with vs without RAG) | ✅ | 1 | |
 | 8 | | Structured outputs + tools | Title, summary, chapters, tags | ⬜ | | |
 | 9 | | Agents + LangGraph | Router + retriever + answer graph | ⬜ | | |
 | 10 | | Multi-agent + verifier | All agents, verifier loop, SSE | ⬜ | | |
@@ -71,6 +71,13 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 - **Problems / how I solved them:** two videos added together made two threads open Chroma at once and indexing failed; added an init lock for the store and the model
 - **Result:** 2 real videos, 51 chunks; library search finds the right minutes in a 1 hour talk; vectors survive restart
 - **Tomorrow:** Day 7 — RAG chat with `[mm:ss]` citations
+
+### Day 7 — 2026-11-22
+- **Learned:** retrieve → augment → generate, grounding rules, NOT_FOUND, citations, k trade-off, RAG vs fine-tuning
+- **Built:** `app/services/rag.py`, RAG prompts in `app/llm/prompts.py`, `POST /api/chat` (video or whole library, history, provider), `POST /api/chat/compare`, `learn/day07_rag.py`
+- **Problems / how I solved them:** one compare call returned 502 without a reason in the log; chat routes now log the real exception
+- **Result:** 10 questions on a real 1 hour talk: 9 answered with correct timestamps, out-of-video question → NOT_FOUND
+- **Tomorrow:** Day 8 — structured outputs (title, summary, chapters, tags) and tool calling
 
 ---
 
