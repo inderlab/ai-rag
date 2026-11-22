@@ -1,9 +1,14 @@
+import sys
+from pathlib import Path
+
 import pytest
 
 from app.config import settings
 from app.ingestion import embedder
 from app.vectorstore import chroma_store
 from tests.fakes import FakeModel
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 
 @pytest.fixture(autouse=True)

@@ -111,6 +111,17 @@ Write each concept in my own words after learning it. If I can't explain it here
 - Test: `npm run build` (tsc + vite) saaf. Headless Chrome se dono pages ke screenshots dekhe. Frontend ka `streamChat` Node mein live server pe chalaya: quiz (steps + result) aur QA (101 token events, verified, [35:18] [36:23]).
 - Abhi nahi bana: login (backend mein auth nahi hai) aur video upload (Whisper wala raasta). Dono TODO.
 
+## Day 12 — MCP
+- MCP (Model Context Protocol): ek standard plug. Ek baar MCP server banao, phir Claude Desktop, Cursor ya koi bhi MCP client mere tools use kar sakta hai. Function calling ek app ke andar hota hai; MCP tools ko app ke bahar, sabke liye kholta hai.
+- Server ke 3 cheezein de sakta hai: tools (actions), resources (data padhna), prompts (templates). Maine tools banaye.
+- `mcp_server/server.py` patla hai: koi AI logic nahi, sirf VidMind API (`/api/videos`, `/api/search`, `/api/chat`, `/api/videos/{id}/insights`) ko httpx se call karta hai. Saara dimaag backend mein hi rehta hai.
+- 5 tools: `list_videos`, `search_videos`, `ask_video`, `get_video_summary` (nahi bana to bana deta hai), `ingest_youtube`. Read-only tools pe `readOnlyHint` annotation, taaki client jaane ye kuch badalte nahi.
+- Transport: `stdio` (Claude Desktop server ko subprocess ki tarah chalata hai, stdin/stdout pe baat) ya `streamable-http` (remote).
+- `mcp` 2.x mein `FastMCP` ka naam `MCPServer` ho gaya (`from mcp.server.mcpserver import MCPServer`). Normal exception ka message chhup jaata hai, isliye `ToolError` raise karo taaki AI ko asli wajah dikhe ("Video not found").
+- Auth: backend mein abhi login nahi hai. Server `VIDMIND_API_KEY` ho to `Authorization: Bearer` bhejta hai. Remote MCP ke liye OAuth (MCP spec ka auth) ya API key + HTTPS.
+- My test: `learn/day12_mcp_add.py --demo` (add, multiply). Asli server stdio subprocess ki tarah chalaya, live backend pe 5 calls: list, search ("data poisoning" → [55:08]), ask (LLM OS [42:18]), summary, aur galat id pe saaf error. 8 pytest tests (in-process MCP client + mock API).
+- Claude Desktop config `mcp_server/README.md` mein hai. Screen recording abhi baaki hai (mujhe Claude Desktop pe khud chalana hai).
+
 ## Interview answers (practice)
 1. Why ChromaDB? Local, free, Python se seedha chalta hai, disk pe save hota hai (PersistentClient), metadata filter (`where`) deta hai. Is size ke project ke liye alag server nahi chahiye. Scale badhe to pgvector ya Qdrant pe ja sakte hain, kyunki store ek wrapper (`chroma_store.py`) ke peeche hai.
 2. Why chunk overlap? Chunk ki seema pe koi baat aadhi ek chunk mein aur aadhi agle mein chali jaati hai. Overlap se wo baat kam se kam ek chunk mein poori rehti hai. Kharcha: thoda zyada storage aur embedding.
@@ -133,3 +144,5 @@ Write each concept in my own words after learning it. If I can't explain it here
 19. Verifier kaise decide karta hai? Regex se `[mm:ss]` nikalo, seconds mein badlo, check karo ki kisi retrieved chunk ke time range (±2 s) mein hai. Galat ho ya citation na ho to feedback ke saath ek retry, phir bhi galat to galat timestamp hata do. Ye code hai, LLM nahi, isliye sasta aur pakka.
 20. Streaming kaise kaam karta hai? Server ek lambi HTTP response kholta hai (`text/event-stream`) aur har token aate hi `data: {...}\n\n` likh deta hai. Browser `fetch` ka body stream padhta hai aur UI turant update karta hai. User ko pehla shabd ~4 s mein dikhta hai, poora jawab ka wait nahi.
 21. Status ke liye polling vs websocket? Polling: har N second GET, simple, stateless, thode users ke liye kaafi. Websocket/SSE: server khud batata hai, kam requests, turant update, par connection sambhalna padta hai. Mainne polling li, sirf jab koi video busy ho.
+22. MCP vs function calling? Function calling: ek app apne LLM ko tools deta hai, sirf us app ke andar. MCP: tools ek alag server mein, standard protocol se; koi bhi MCP client (Claude Desktop, Cursor, IDE) bina naya code likhe use kar sakta hai. MCP andar se function calling hi use karta hai.
+23. MCP server mein auth kaise? Local stdio: process user ki machine pe hai, env mein API key. Remote HTTP: HTTPS + OAuth (MCP auth spec) ya bearer token, server har tool call pe user ke permissions check kare, read-only aur write tools alag, write pe confirmation.

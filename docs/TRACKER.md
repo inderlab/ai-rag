@@ -19,7 +19,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 | 9 | 2026-11-22 | Agents + LangGraph | `agents/state.py`, `agents/router.py`, `agents/graph.py` (router → retriever → answer), `/api/agent/chat` with trace | ✅ | 1 | |
 | 10 | 2026-11-22 | Multi-agent + verifier | summarizer, quiz, library search, verifier retry loop, query rewrite, `/api/chat` on the graph, `/api/chat/stream` (SSE) | ✅ | 1 | |
 | 11 | 2026-11-22 | React + Vite | Library (status, search, library chat), video page (player, chapters, streaming chat, quiz), model dropdown | ✅ | 1 | |
-| 12 | | MCP | MCP server + Claude Desktop demo | ⬜ | | |
+| 12 | 2026-11-22 | MCP | `mcp_server/server.py` (5 tools over the API), stdio + HTTP, tests, Claude Desktop config | ✅ | 1 | |
 | 13 | | Eval + n8n | Eval script, n8n workflows | ⬜ | | |
 | 14 | | Docker + CI + launch | Compose, README, demo video, deploy | ⬜ | | |
 
@@ -106,6 +106,14 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 - **Problems / how I solved them:** `EventSource` can't POST, so the stream is read with `fetch` + reader; login and upload are not built yet because the backend has no auth or Whisper path
 - **Result:** `npm run build` clean; screenshots of both pages look right; frontend stream parser tested against the live server
 - **Tomorrow:** Day 12 — MCP server
+
+### Day 12 — 2026-11-22
+- **Learned:** MCP vs function calling, tools / resources / prompts, stdio vs streamable HTTP, tool annotations, auth options
+- **Built:** `mcp_server/server.py` (`list_videos`, `search_videos`, `ask_video`, `get_video_summary`, `ingest_youtube`), `mcp_server/README.md` with Claude Desktop config, `tests/test_mcp_server.py`, `learn/day12_mcp_add.py`
+- **Problems / how I solved them:** mcp 2.x renamed FastMCP to MCPServer; plain exceptions hid the real error, now `ToolError`; tool descriptions moved from docstrings to `description=`
+- **Result:** server works as a real stdio subprocess against the live API; 8 tests pass
+- **Still to do by me:** add it to Claude Desktop and screen-record the demo
+- **Tomorrow:** Day 13 — eval + n8n
 
 ---
 
