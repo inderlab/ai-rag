@@ -132,6 +132,12 @@ Write each concept in my own words after learning it. If I can't explain it here
 - Answers: Claude haiku, 93-96% jawab sahi moment cite karte hain, ~2.3 s. Jo miss hue wahan retrieval fail tha, aur model ne galat banane ki jagah NOT_FOUND bola.
 - n8n: backend `N8N_WEBHOOK_URL` pe `video.ready` / `video.failed` POST karta hai (title, summary, chapters, app link). Workflow 1: Webhook → IF → Telegram. Workflow 2: har 6 ghante → channel RSS → naye uploads → `POST /api/videos`. Local receiver se live test kiya, payload sahi aaya. Webhook fail ho to sirf warning, ingest nahi tootta.
 
+## Day 14 — Docker, CI, launch
+- Docker: backend image (python slim + CPU torch, non-root user, healthcheck), frontend multi-stage (node build → nginx). Compose: backend + frontend + optional n8n (`--profile automation`), data aur model ke liye volumes taaki restart pe kuch na khoye.
+- nginx `/api/` ko backend pe bhejta hai aur `proxy_buffering off`, warna SSE tokens ek saath aate (streaming toot jaati).
+- CI har push pe: ruff lint + format check, 130 pytest tests (fake model + fake LLM, koi key nahi), frontend build, aur dono Docker images build.
+- README = sales page: problem, features, screenshots, architecture, eval table, OpenAI vs Claude, setup.
+
 ## Interview answers (practice)
 1. Why ChromaDB? Local, free, Python se seedha chalta hai, disk pe save hota hai (PersistentClient), metadata filter (`where`) deta hai. Is size ke project ke liye alag server nahi chahiye. Scale badhe to pgvector ya Qdrant pe ja sakte hain, kyunki store ek wrapper (`chroma_store.py`) ke peeche hai.
 2. Why chunk overlap? Chunk ki seema pe koi baat aadhi ek chunk mein aur aadhi agle mein chali jaati hai. Overlap se wo baat kam se kam ek chunk mein poori rehti hai. Kharcha: thoda zyada storage aur embedding.

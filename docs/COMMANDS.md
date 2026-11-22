@@ -82,11 +82,20 @@ git remote add origin https://github.com/inderlab/vidmind-ai.git
 git push -u origin main
 ```
 
-## Later (added as the project grows)
+## Agents, MCP, eval, n8n, Docker
 
 ```bash
-python -m mcp_server.server              # Day 12: run MCP server
-python eval/run_eval.py --provider claude   # Day 13: retrieval eval
-npx n8n                                  # Day 13: run n8n locally
-docker compose up --build                # Day 14: everything in Docker
+cd backend && source .venv/bin/activate
+python ../mcp_server/server.py                          # MCP server (stdio)
+python ../eval/run_eval.py                              # retrieval eval, sizes 150/300/600
+python ../eval/run_eval.py --rewrite --provider claude  # + query rewriting + answers
+docker compose up --build                               # web :8080, API :8000
+docker compose --profile automation up                  # + n8n :5678
+```
+
+Stream a chat answer in the terminal:
+
+```bash
+curl -N -X POST localhost:8000/api/chat/stream -H 'content-type: application/json' \
+  -d '{"question":"Is video ka summary do","video_id":1}'
 ```

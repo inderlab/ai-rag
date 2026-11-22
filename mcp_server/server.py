@@ -33,9 +33,7 @@ class VidMindError(ToolError):
 
 def client() -> httpx.Client:
     headers = {"Authorization": f"Bearer {API_KEY}"} if API_KEY else {}
-    return httpx.Client(
-        base_url=API_URL, timeout=TIMEOUT, headers=headers, transport=transport
-    )
+    return httpx.Client(base_url=API_URL, timeout=TIMEOUT, headers=headers, transport=transport)
 
 
 def call(method: str, path: str, **kwargs: Any) -> Any:
@@ -92,9 +90,7 @@ def search_videos(query: str, video_id: int | None = None, k: int = 6) -> str:
     ),
     annotations=READ_ONLY,
 )
-def ask_video(
-    question: str, video_id: int | None = None, provider: str | None = None
-) -> str:
+def ask_video(question: str, video_id: int | None = None, provider: str | None = None) -> str:
     data = call(
         "POST",
         "/chat",

@@ -21,7 +21,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 | 11 | 2026-11-22 | React + Vite | Library (status, search, library chat), video page (player, chapters, streaming chat, quiz), model dropdown | ✅ | 1 | |
 | 12 | 2026-11-22 | MCP | `mcp_server/server.py` (5 tools over the API), stdio + HTTP, tests, Claude Desktop config | ✅ | 1 | |
 | 13 | 2026-11-22 | Eval + n8n | `eval/run_eval.py` + 28 questions, n8n webhook + 2 workflows | ✅ | 1 | |
-| 14 | | Docker + CI + launch | Compose, README, demo video, deploy | ⬜ | | |
+| 14 | 2026-11-22 | Docker + CI + launch | Dockerfiles, compose, CI (lint, tests, build, docker build), README, changelog | 🔄 | 1 | |
 
 ## Daily log
 
@@ -122,6 +122,12 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 - **Result:** 300 words is best (Hit@1 82%, MRR 0.89); answers cite the right moment 93-96%; webhook tested live with a local receiver
 - **Still to do by me:** import the two workflows into n8n and connect Telegram
 - **Tomorrow:** Day 14 — Docker, CI, README, launch
+
+### Day 14 — 2026-11-22
+- **Learned:** multi-stage Docker builds, nginx as SPA + API proxy (buffering off for SSE), compose volumes and profiles, CI caching
+- **Built:** `backend/Dockerfile` (CPU torch, non-root, healthcheck), `frontend/Dockerfile` + `nginx.conf`, `docker-compose.yml` (backend, frontend, optional n8n), `backend/.env.example`, CI with ruff format check + docker build, new README with screenshots and eval table, ARCHITECTURE / COMMANDS / UPDATES updated
+- **Problems / how I solved them:** Docker is not installed on this laptop, so the images are built by the new CI `docker` job
+- **Still to do by me:** demo video (2 min), deploy, LinkedIn post, add the project to my resume, run the OpenAI column of the eval when I have a key
 
 ---
 

@@ -5,6 +5,35 @@ Format: `## [version] - YYYY-MM-DD` with **Added / Changed / Fixed / Removed**.
 
 ---
 
+## [1.0.0] - 2026-11-22
+
+### Added
+- ChromaDB vector store, indexing step (`indexing` status), `/api/search`, reindex
+- RAG chat with `[mm:ss]` citations, NOT_FOUND handling, with/without RAG compare
+- Structured outputs in both providers; auto insights (title, summary, chapters, tags, key points)
+- LangGraph multi-agent chat: router with query rewriting, retriever, library search, summarizer, quiz, citation verifier with retry
+- `/api/chat/stream` (SSE with steps and tokens)
+- React library and video pages: status polling, streaming chat, clickable timestamps, chapters, quiz, model dropdown
+- MCP server with 5 tools
+- Eval (28 questions, hit rate, MRR, citation accuracy) and n8n webhook + 2 workflows
+- Docker Compose (backend, nginx frontend, optional n8n), `.env.example`, CI docker build
+
+### Changed
+- `/api/chat` now runs the agent graph; plain RAG moved to `/api/chat/rag`
+
+### Fixed
+- Indexing failed when two videos were added at once (init lock on store and model)
+- YouTube errors now show the real cause line
+
+## [0.2.0] - 2026-11-17
+
+### Added
+- LLM chat, streaming, provider compare, prompt styles (days 1-2)
+- Video ingestion with SQLite and background jobs (day 3)
+- Multilingual embeddings and semantic search (day 4), segment-aware chunking (day 5)
+
+---
+
 ## [0.1.0] - 2026-11-10
 
 ### Added
