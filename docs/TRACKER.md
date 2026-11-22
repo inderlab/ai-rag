@@ -18,7 +18,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 | 8 | 2026-11-22 | Structured outputs + tools | `structured()` in both providers, VideoInsights (title, summary, chapters, tags, key points), `/api/videos/{id}/insights`, tool-calling practice | ✅ | 1 | |
 | 9 | 2026-11-22 | Agents + LangGraph | `agents/state.py`, `agents/router.py`, `agents/graph.py` (router → retriever → answer), `/api/agent/chat` with trace | ✅ | 1 | |
 | 10 | 2026-11-22 | Multi-agent + verifier | summarizer, quiz, library search, verifier retry loop, query rewrite, `/api/chat` on the graph, `/api/chat/stream` (SSE) | ✅ | 1 | |
-| 11 | | React + Vite | Library, video page, chat, quiz, model dropdown | ⬜ | | |
+| 11 | 2026-11-22 | React + Vite | Library (status, search, library chat), video page (player, chapters, streaming chat, quiz), model dropdown | ✅ | 1 | |
 | 12 | | MCP | MCP server + Claude Desktop demo | ⬜ | | |
 | 13 | | Eval + n8n | Eval script, n8n workflows | ⬜ | | |
 | 14 | | Docker + CI + launch | Compose, README, demo video, deploy | ⬜ | | |
@@ -99,6 +99,13 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 - **Problems / how I solved them:** single-video answers added an extra "Video: ..." line, so titles and the library note are only sent for library search; stripped citations left double spaces, fixed
 - **Result:** verifier catches a fake `[12:00]`; warm stream first token 4.2 s, done 5.2 s; summary / quiz / library paths work live
 - **Tomorrow:** Day 11 — React frontend
+
+### Day 11 — 2026-11-22
+- **Learned:** SSE over `fetch` for POST, YouTube IFrame API `seekTo`, polling only while busy, forwardRef
+- **Built:** `api/client.ts` (types + `streamChat`), `LibraryPage`, `VideoPage`, `ChatPanel`, `RichText` (clickable `[mm:ss]`), `QuizView`, `InsightsPanel`, `YouTubePlayer`, `StatusBadge`, `ProviderSelect`
+- **Problems / how I solved them:** `EventSource` can't POST, so the stream is read with `fetch` + reader; login and upload are not built yet because the backend has no auth or Whisper path
+- **Result:** `npm run build` clean; screenshots of both pages look right; frontend stream parser tested against the live server
+- **Tomorrow:** Day 12 — MCP server
 
 ---
 

@@ -100,6 +100,17 @@ Write each concept in my own words after learning it. If I can't explain it here
 - `POST /api/chat` ab agent graph chalata hai. Purana seedha RAG `POST /api/chat/rag` pe hai.
 - Fayda vs nuksaan: har agent chhota aur testable, verifier galat citation pakadta hai. Par router + retry = zyada LLM calls, zyada latency aur cost.
 
+## Day 11 — React frontend
+- Pages: Library (`/`: video add, status badges, 2 s polling jab tak koi video pending/processing/indexing hai, retry, delete, meaning se library search, library chat) aur Video (`/videos/:id?t=`: player, summary + tags + clickable chapters + key points, chat, quiz).
+- `RichText` component (practice wala): jawab mein `[04:12]` regex se dhoondh ke button banata hai, click → `seekTo(252)`. `**bold**` aur `- bullet` bhi.
+- Player: YouTube IFrame API seedha (`window.YT.Player`), `forwardRef` se `seekTo()` bahar diya. Library chat ka timestamp doosri video ka ho to us video pe `?t=` ke saath chale jaate hain.
+- Streaming: `EventSource` sirf GET karta hai, hamara `/api/chat/stream` POST hai. Isliye `fetch` + `res.body.getReader()` se padha, `\n\n` pe tod ke `data: {...}` parse kiya. Events: step (chips), token (text judta hai), retry (text saaf), done (final jawab + quiz), error.
+- Quiz: options pe click → sahi hara, galat laal, explanation + timestamp, score.
+- Model dropdown: `/api/llm/providers` se, jiski key nahi wo disabled ("no key").
+- Polling vs websocket: status har 2 s poll karna simple hai aur sirf busy videos tak chalta hai. Websocket/SSE tab jab bahut users ya turant update chahiye.
+- Test: `npm run build` (tsc + vite) saaf. Headless Chrome se dono pages ke screenshots dekhe. Frontend ka `streamChat` Node mein live server pe chalaya: quiz (steps + result) aur QA (101 token events, verified, [35:18] [36:23]).
+- Abhi nahi bana: login (backend mein auth nahi hai) aur video upload (Whisper wala raasta). Dono TODO.
+
 ## Interview answers (practice)
 1. Why ChromaDB? Local, free, Python se seedha chalta hai, disk pe save hota hai (PersistentClient), metadata filter (`where`) deta hai. Is size ke project ke liye alag server nahi chahiye. Scale badhe to pgvector ya Qdrant pe ja sakte hain, kyunki store ek wrapper (`chroma_store.py`) ke peeche hai.
 2. Why chunk overlap? Chunk ki seema pe koi baat aadhi ek chunk mein aur aadhi agle mein chali jaati hai. Overlap se wo baat kam se kam ek chunk mein poori rehti hai. Kharcha: thoda zyada storage aur embedding.
@@ -120,3 +131,5 @@ Write each concept in my own words after learning it. If I can't explain it here
 17. Ek bade prompt ki jagah graph kyun? Har step ka ek kaam (chhote, focused prompts), har node ka alag test, beech mein code se check (verifier, retries), aur naya agent jodna aasaan. Nuksaan: zyada LLM calls = zyada latency aur cost.
 18. Multi-agent ka fayda aur nuksaan? Fayda: har agent ka chhota prompt aur ek kaam, alag test, alag model chun sakte ho, verifier jaisa check beech mein. Nuksaan: zyada calls (router + answer + retry) = zyada latency aur cost, debug mein zyada steps. Isliye trace (`steps`) aur tokens log karte hain.
 19. Verifier kaise decide karta hai? Regex se `[mm:ss]` nikalo, seconds mein badlo, check karo ki kisi retrieved chunk ke time range (±2 s) mein hai. Galat ho ya citation na ho to feedback ke saath ek retry, phir bhi galat to galat timestamp hata do. Ye code hai, LLM nahi, isliye sasta aur pakka.
+20. Streaming kaise kaam karta hai? Server ek lambi HTTP response kholta hai (`text/event-stream`) aur har token aate hi `data: {...}\n\n` likh deta hai. Browser `fetch` ka body stream padhta hai aur UI turant update karta hai. User ko pehla shabd ~4 s mein dikhta hai, poora jawab ka wait nahi.
+21. Status ke liye polling vs websocket? Polling: har N second GET, simple, stateless, thode users ke liye kaafi. Websocket/SSE: server khud batata hai, kam requests, turant update, par connection sambhalna padta hai. Mainne polling li, sirf jab koi video busy ho.
