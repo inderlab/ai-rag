@@ -47,13 +47,18 @@ VidMind AI has two flows:
 
 | Table | Columns |
 |---|---|
-| `videos` | id, source, youtube_id, url, title, channel, status, error, language, is_generated, duration_seconds, segment_count, chunk_count, created_at, updated_at |
+| `users` | id, name, email (unique), password_hash (bcrypt), created_at |
+| `videos` | id, user_id (NULL = shared YouTube video), file_path (uploads), source, youtube_id, url, title, channel, status, error, language, is_generated, duration_seconds, segment_count, chunk_count, created_at, updated_at |
 | `transcript_segments` | id, video_id, position, start, end, text |
 | `video_insights` | id, video_id, title, summary, chapters (JSON), tags (JSON), key_points (JSON), provider, model, tokens, created_at |
 
 New columns are added on startup by `add_missing_columns()` (simple SQLite migration).
 
-**ChromaDB collection `vidmind_chunks`** (cosine): `id = {video_id}:{position}`, document = chunk text, embedding = e5 `passage:` vector, metadata = `{video_id, position, start, end, first_segment, last_segment, title}`. The collection stores the embedding model name and the app refuses to mix models.
+**ChromaDB collection `vidmind_chunks`** (cosine): `id = {video_id}:{position}`, document = chunk text, embedding = e5 `passage:` vector, metadata = `{video_id, position, start, end, first_segment, last_segment, title, user_id}` (`user_id` 0 = shared). Library search filters `user_id in (0, me)`; chunks indexed before this field existed are backfilled on startup.
+
+**Uploads:** file saved to `UPLOAD_DIR` → FFmpeg decodes 16 kHz mono float PCM → `faster-whisper` (VAD on) → segments → same chunk / index / insights steps as YouTube.
+
+**Access:** anonymous requests see shared videos only; a logged-in user also sees their own uploads. `AUTH_REQUIRED=true` makes every data route need a token (`Authorization: Bearer`, or `?token=` for the media URL used by `<video>`). The collection stores the embedding model name and the app refuses to mix models.
 
 **Video status:** `pending → processing → indexing → ready` (or `failed`). Jobs that were running when the server stopped are marked failed on startup.
 

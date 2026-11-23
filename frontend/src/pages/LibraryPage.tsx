@@ -12,6 +12,7 @@ import {
 } from "../api/client";
 import ChatPanel from "../components/ChatPanel";
 import StatusBadge from "../components/StatusBadge";
+import UploadBox from "../components/UploadBox";
 
 const BUSY = new Set(["pending", "processing", "indexing"]);
 
@@ -74,7 +75,9 @@ export default function LibraryPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold">Your videos</h1>
-          <p className="text-sm text-slate-500">Paste a YouTube link. It gets a transcript, chunks, vectors and a summary.</p>
+          <p className="text-sm text-slate-500">
+            Paste a YouTube link or upload a file. It gets a transcript, chunks, vectors and a summary.
+          </p>
         </div>
 
         <form onSubmit={onAdd} className="flex gap-2">
@@ -89,6 +92,7 @@ export default function LibraryPage() {
             {adding ? "Adding…" : "Add video"}
           </button>
         </form>
+        <UploadBox onDone={refresh} />
         {error && <p className="rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
         <form onSubmit={onSearch} className="flex gap-2">
@@ -125,7 +129,13 @@ export default function LibraryPage() {
           {videos.map((v) => (
             <li key={v.id} className="overflow-hidden rounded-lg border bg-white">
               <Link to={`/videos/${v.id}`}>
-                <img src={v.thumbnail_url} alt="" className="aspect-video w-full object-cover" />
+                {v.thumbnail_url ? (
+                  <img src={v.thumbnail_url} alt="" className="aspect-video w-full object-cover" />
+                ) : (
+                  <div className="flex aspect-video w-full items-center justify-center bg-slate-800 text-sm text-slate-300">
+                    Uploaded file
+                  </div>
+                )}
               </Link>
               <div className="space-y-1 p-3">
                 <div className="flex items-start justify-between gap-2">
@@ -136,6 +146,7 @@ export default function LibraryPage() {
                 </div>
                 <p className="text-xs text-slate-500">
                   {v.channel ?? "…"} · {v.duration ?? "--:--"} · {v.chunk_count} chunks
+                  {v.private ? " · private" : ""}
                 </p>
                 {v.error && <p className="text-xs text-red-700">{v.error}</p>}
                 <div className="flex gap-3 pt-1 text-xs">

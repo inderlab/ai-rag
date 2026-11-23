@@ -9,6 +9,7 @@ from app import db
 from app.config import settings
 from app.models import Video, VideoStatus, init_db
 from app.routers import (
+    auth,
     chat,
     chunks,
     embeddings,
@@ -56,6 +57,7 @@ app.add_middleware(
 )
 
 app.include_router(health.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")
 app.include_router(llm.router, prefix="/api")
 app.include_router(prompting.router, prefix="/api")
 app.include_router(transcript.router, prefix="/api")

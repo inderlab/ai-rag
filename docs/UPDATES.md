@@ -5,6 +5,19 @@ Format: `## [version] - YYYY-MM-DD` with **Added / Changed / Fixed / Removed**.
 
 ---
 
+## [1.1.0] - 2026-11-23
+
+### Added
+- Accounts: `/api/auth/register`, `/login`, `/me`, `/config` (JWT + bcrypt), optional `AUTH_REQUIRED`
+- Video and audio upload: `/api/videos/upload`, FFmpeg + faster-whisper transcription, `/api/videos/{id}/media` with Range support
+- Private uploads per user; YouTube videos stay shared; vector search is scoped per user
+- Frontend: login / register page, upload box with progress, HTML5 player for uploads, user menu
+
+### Fixed
+- Anonymous requests could see private uploads in lists and library search
+
+---
+
 ## [1.0.0] - 2026-11-22
 
 ### Added

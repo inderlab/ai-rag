@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field, model_validator
 from sqlalchemy.orm import Session
 
+from app.auth import CurrentUser
 from app.config import settings
 from app.db import get_db
 from app.ingestion import chunker
@@ -133,10 +134,11 @@ def preview(body: PreviewRequest) -> PreviewResponse:
 def list_chunks(
     video_id: int,
     session: DbSession,
+    user: CurrentUser,
     max_words: Annotated[int, Query(ge=10, le=2000)] = settings.CHUNK_MAX_WORDS,
     overlap_words: Annotated[int | None, Query(ge=0)] = None,
 ) -> VideoChunksResponse:
-    video = ready_video(session, video_id)
+    video = ready_video(session, video_id, user)
     overlap = overlap_for(max_words, overlap_words)
     chunks = video_chunks(session, video, max_words, overlap)
     return VideoChunksResponse(
@@ -153,9 +155,10 @@ def list_chunks(
 def compare_sizes(
     video_id: int,
     session: DbSession,
+    user: CurrentUser,
     sizes: Annotated[str, Query(pattern=r"^\d+(,\d+){0,5}$")] = "100,300,800",
 ) -> CompareResponse:
-    video = ready_video(session, video_id)
+    video = ready_video(session, video_id, user)
     results = []
     for size in (int(s) for s in sizes.split(",")):
         if not 10 <= size <= 2000:

@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.auth import CurrentUser
 from app.db import get_db
 from app.llm.factory import get_llm
 from app.models import VideoInsightsRow
@@ -63,8 +64,8 @@ def to_out(row: VideoInsightsRow) -> InsightsOut:
 
 
 @router.get("/{video_id}/insights", response_model=InsightsOut)
-def get_insights(video_id: int, session: DbSession) -> InsightsOut:
-    video = ready_video(session, video_id)
+def get_insights(video_id: int, session: DbSession, user: CurrentUser) -> InsightsOut:
+    video = ready_video(session, video_id, user)
     if video.insights is None:
         raise HTTPException(status_code=404, detail="No insights yet, POST to generate them")
     return to_out(video.insights)
@@ -72,9 +73,9 @@ def get_insights(video_id: int, session: DbSession) -> InsightsOut:
 
 @router.post("/{video_id}/insights", response_model=InsightsOut)
 def generate_insights(
-    video_id: int, session: DbSession, body: GenerateRequest | None = None
+    video_id: int, session: DbSession, user: CurrentUser, body: GenerateRequest | None = None
 ) -> InsightsOut:
-    video = ready_video(session, video_id)
+    video = ready_video(session, video_id, user)
     try:
         llm = get_llm(body.provider if body else None)
     except ValueError as e:

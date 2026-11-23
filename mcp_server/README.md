@@ -26,7 +26,7 @@ Settings (environment variables):
 | Name | Default |
 |---|---|
 | `VIDMIND_API_URL` | `http://127.0.0.1:8000/api` |
-| `VIDMIND_API_KEY` | empty (sent as `Authorization: Bearer ...` when set) |
+| `VIDMIND_API_KEY` | empty; put a login token here (from `POST /api/auth/login`) when the backend runs with `AUTH_REQUIRED=true` or to include your private uploads |
 | `VIDMIND_TIMEOUT` | `180` seconds |
 | `MCP_TRANSPORT` | `stdio` |
 

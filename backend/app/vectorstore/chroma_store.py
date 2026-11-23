@@ -46,8 +46,26 @@ class ChromaStore:
                 f"Collection '{collection}' was built with '{stored}' but the app uses "
                 f"'{current}'. Re-index or change CHROMA_COLLECTION."
             )
+        self.backfill_user_ids()
 
-    def add_chunks(self, video_id: int, chunks: Sequence[Chunk], title: str = "") -> int:
+    def backfill_user_ids(self) -> int:
+        rows = self.collection.get(include=["metadatas"])
+        missing = [
+            (i, {**m, "user_id": 0})
+            for i, m in zip(rows["ids"], rows["metadatas"], strict=True)
+            if "user_id" not in (m or {})
+        ]
+        if missing:
+            self.collection.update(ids=[i for i, _ in missing], metadatas=[m for _, m in missing])
+        return len(missing)
+
+    def add_chunks(
+        self,
+        video_id: int,
+        chunks: Sequence[Chunk],
+        title: str = "",
+        user_id: int | None = None,
+    ) -> int:
         self.delete_video(video_id)
         if not chunks:
             return 0
@@ -65,20 +83,28 @@ class ChromaStore:
                     "first_segment": c.first_segment,
                     "last_segment": c.last_segment,
                     "title": title,
+                    "user_id": user_id or 0,
                 }
                 for c in chunks
             ],
         )
         return len(chunks)
 
-    def search(self, question: str, video_id: int | None = None, k: int = 6) -> list[Hit]:
-        total = self.count(video_id)
+    def search(
+        self,
+        question: str,
+        video_id: int | None = None,
+        k: int = 6,
+        user_id: int | None = None,
+    ) -> list[Hit]:
+        where = scope(video_id, user_id)
+        total = self.count(video_id) if user_id is None else self.count_where(where)
         if total == 0:
             return []
         result = self.collection.query(
             query_embeddings=[embedder.embed_query(question)],
             n_results=min(k, total),
-            where={"video_id": video_id} if video_id is not None else None,
+            where=where,
             include=["documents", "metadatas", "distances"],
         )
         return [
@@ -94,7 +120,12 @@ class ChromaStore:
     def count(self, video_id: int | None = None) -> int:
         if video_id is None:
             return self.collection.count()
-        return len(self.collection.get(where={"video_id": video_id}, include=[])["ids"])
+        return self.count_where({"video_id": video_id})
+
+    def count_where(self, where: dict | None) -> int:
+        if where is None:
+            return self.collection.count()
+        return len(self.collection.get(where=where, include=[])["ids"])
 
     def info(self) -> dict[str, Any]:
         return {
@@ -104,6 +135,14 @@ class ChromaStore:
             "embedding_model": (self.collection.metadata or {}).get("embedding_model"),
             "distance": (self.collection.metadata or {}).get("hnsw:space"),
         }
+
+
+def scope(video_id: int | None, user_id: int | None) -> dict | None:
+    if video_id is not None:
+        return {"video_id": video_id}
+    if user_id is not None:
+        return {"user_id": {"$in": sorted({0, user_id})}}
+    return None
 
 
 def to_hit(doc: str, meta: dict[str, Any], distance: float) -> Hit:

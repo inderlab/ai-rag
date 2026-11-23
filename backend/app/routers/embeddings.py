@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.auth import CurrentUser
 from app.config import settings
 from app.db import get_db
 from app.ingestion import embedder
@@ -191,9 +192,9 @@ def similarity(body: SimilarityRequest) -> SimilarityResponse:
 
 @router.post("/videos/{video_id}/semantic-search", response_model=SemanticSearchResponse)
 def semantic_search(
-    video_id: int, body: SemanticSearchRequest, session: DbSession
+    video_id: int, body: SemanticSearchRequest, session: DbSession, user: CurrentUser
 ) -> SemanticSearchResponse:
-    video = ready_video(session, video_id)
+    video = ready_video(session, video_id, user)
     if body.overlap_words >= body.max_words:
         raise HTTPException(status_code=422, detail="overlap_words must be smaller than max_words")
     model_or_503()

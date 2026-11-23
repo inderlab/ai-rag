@@ -27,7 +27,7 @@ def build_graph(llm: LLMProvider, stream: bool = False):
 
     def library_node(state: AgentState) -> dict:
         query = state.get("search_query") or state["question"]
-        hits = rag.retrieve(query, None, state.get("k") or settings.SEARCH_K)
+        hits = rag.retrieve(query, None, state.get("k") or settings.SEARCH_K, state.get("user_id"))
         videos = len({h.video_id for h in hits})
         return {"chunks": hits, "steps": [f"library_search:{len(hits)}/{videos}"]}
 
@@ -90,6 +90,7 @@ def initial_state(question: str, video_id: int | None, **kwargs) -> AgentState:
     return {
         "question": question,
         "video_id": video_id,
+        "user_id": kwargs.get("user_id"),
         "history": kwargs.get("history") or [],
         "k": kwargs.get("k") or settings.SEARCH_K,
         "retries": 0,

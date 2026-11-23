@@ -9,6 +9,7 @@ Intent = Literal["qa", "summary", "search_library", "quiz"]
 class AgentState(TypedDict, total=False):
     question: str
     video_id: int | None
+    user_id: int | None
     history: list[dict]
     k: int
     intent: Intent

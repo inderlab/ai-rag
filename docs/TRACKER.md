@@ -22,6 +22,7 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 | 12 | 2026-11-22 | MCP | `mcp_server/server.py` (5 tools over the API), stdio + HTTP, tests, Claude Desktop config | ✅ | 1 | |
 | 13 | 2026-11-22 | Eval + n8n | `eval/run_eval.py` + 28 questions, n8n webhook + 2 workflows | ✅ | 1 | |
 | 14 | 2026-11-22 | Docker + CI + launch | Dockerfiles, compose, CI (lint, tests, build, docker build), README, changelog | 🔄 | 1 | |
+| + | 2026-11-23 | Auth + uploads (Day 11 leftovers) | JWT login, private uploads, FFmpeg + faster-whisper, media streaming, login page, upload box | ✅ | 1 | |
 
 ## Daily log
 
@@ -130,6 +131,12 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 - **Still to do by me:** demo video (2 min), deploy, LinkedIn post, add the project to my resume, run the OpenAI column of the eval when I have a key
 
 ---
+
+### Extra — 2026-11-23 (Day 11 leftovers: login + upload)
+- **Learned:** bcrypt, JWT (sign, expiry, stateless), access rules (shared vs private), streaming file upload, FFmpeg audio decode, Whisper with VAD, HTTP Range for seeking
+- **Built:** `app/auth.py`, `/api/auth/*`, `users` table, `videos.user_id` / `file_path`, `app/ingestion/whisper.py`, `/api/videos/upload`, `/api/videos/{id}/media`, user-scoped search and chat, frontend login page, upload box, media player, user menu
+- **Problems / how I solved them:** faster-whisper broke with PyAV 19, so FFmpeg decodes audio; screenshot showed a private upload to an anonymous visitor, fixed and tested; Chroma chunks without `user_id` are backfilled
+- **Result:** 145 tests; live: 401 without token, upload transcribed in 19 s, verified Hinglish answer, Range 206
 
 ## Eval results (fill on Day 13)
 

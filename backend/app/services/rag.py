@@ -62,8 +62,8 @@ def build_messages(
     return [*history, {"role": "user", "content": prompt}]
 
 
-def retrieve(question: str, video_id: int | None, k: int) -> list[Hit]:
-    return get_store().search(question, video_id=video_id, k=k)
+def retrieve(question: str, video_id: int | None, k: int, user_id: int | None = None) -> list[Hit]:
+    return get_store().search(question, video_id=video_id, k=k, user_id=user_id)
 
 
 def generate(
@@ -123,9 +123,10 @@ def ask(
     video_id: int | None = None,
     k: int | None = None,
     history: list[dict] | None = None,
+    user_id: int | None = None,
 ) -> Answer:
     start = time.perf_counter()
-    hits = retrieve(question, video_id, k or settings.SEARCH_K)
+    hits = retrieve(question, video_id, k or settings.SEARCH_K, user_id)
     retrieval_ms = int((time.perf_counter() - start) * 1000)
     answer = generate(llm, question, hits, history)
     answer.extra["retrieval_ms"] = retrieval_ms

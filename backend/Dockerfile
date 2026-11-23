@@ -5,9 +5,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     HF_HOME=/models \
     DATABASE_URL=sqlite:////data/vidmind.db \
-    CHROMA_DIR=/data/chroma
+    CHROMA_DIR=/data/chroma \
+    UPLOAD_DIR=/data/uploads
 
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
 COPY requirements.txt .

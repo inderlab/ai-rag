@@ -138,6 +138,17 @@ Write each concept in my own words after learning it. If I can't explain it here
 - CI har push pe: ruff lint + format check, 130 pytest tests (fake model + fake LLM, koi key nahi), frontend build, aur dono Docker images build.
 - README = sales page: problem, features, screenshots, architecture, eval table, OpenAI vs Claude, setup.
 
+## Extra (2026-11-23) — Login + Upload (Whisper)
+- Password kabhi seedha save nahi karte. bcrypt hash (salt ke saath, jaan-boojh ke slow) save hota hai; login pe `checkpw` se milate hain.
+- JWT: server ek signed token deta hai (`sub` = user id, `exp` = expiry). Har request pe `Authorization: Bearer <token>`. Server database mein session nahi rakhta, sirf signature check karta hai (stateless). Secret 32+ characters ka; `.env` mein na ho to app har run pe random secret banata hai (restart pe login dobara).
+- `<video src>` header nahi bhej sakta, isliye media URL pe `?token=` bhi chalta hai.
+- Privacy rule: YouTube videos public content hain = shared library (`user_id` NULL). Upload apne malik ka private. Vector search bhi `user_id in (0, me)` se filter hota hai, warna library search mein doosre ka private chunk aa jaata.
+- Bug pakda: screenshot mein login ke bina private upload dikh raha tha. Fix: anonymous sirf shared dekhe, aur purane Chroma chunks pe `user_id=0` backfill. Test bhi likha.
+- Upload flow: file chunks mein disk pe (size limit, 413), FFmpeg se 16 kHz mono float audio, `faster-whisper` (base model, int8, CPU, VAD) se timestamped segments, phir wahi chunk → embed → Chroma → insights.
+- `faster-whisper` 1.2.1 naye PyAV 19 ke saath toot raha tha, isliye audio FFmpeg se khud decode karke numpy array Whisper ko diya. Ek dependency kam.
+- My test (live, login required): bina token 401; `say` se bani 21 s ki MP4 upload; 19 s mein ready, 7 segments, language en; Hinglish sawaal "Data restart ke baad kaise bachega?" → volumes wala sahi jawab, verified; media pe Range request → 206 (seek kaam karta hai).
+- Chhoti clip (21 s) ek hi chunk hai, isliye citation `[00:00]` aaya, `[00:17]` nahi. Lambi video mein chunk chhote hisse hote hain.
+
 ## Interview answers (practice)
 1. Why ChromaDB? Local, free, Python se seedha chalta hai, disk pe save hota hai (PersistentClient), metadata filter (`where`) deta hai. Is size ke project ke liye alag server nahi chahiye. Scale badhe to pgvector ya Qdrant pe ja sakte hain, kyunki store ek wrapper (`chroma_store.py`) ke peeche hai.
 2. Why chunk overlap? Chunk ki seema pe koi baat aadhi ek chunk mein aur aadhi agle mein chali jaati hai. Overlap se wo baat kam se kam ek chunk mein poori rehti hai. Kharcha: thoda zyada storage aur embedding.
@@ -164,3 +175,6 @@ Write each concept in my own words after learning it. If I can't explain it here
 23. MCP server mein auth kaise? Local stdio: process user ki machine pe hai, env mein API key. Remote HTTP: HTTPS + OAuth (MCP auth spec) ya bearer token, server har tool call pe user ke permissions check kare, read-only aur write tools alag, write pe confirmation.
 24. Hit rate @6 ka matlab? 100 sawaalon mein se kitne sawaalon ke liye sahi chunk top 6 results mein tha. Mere RAG mein answer step top 6 padhta hai, isliye ye number seedha batata hai ki LLM ke paas sahi jaankari thi ya nahi.
 25. Eval mein kya badla aur kyun? Chunk size 150/300/600 try kiye, 300 best (MRR 0.89). Hinglish kamzor mila (Hit@1 50%), to query rewriting naapi: Hit@6 96% → 100%. Do queries ko milana (RRF) try kiya, fayda nahi, to chhod diya. Ek waqt pe ek cheez badli.
+26. JWT kaise kaam karta hai? Header.payload.signature. Server secret se sign karta hai; har request pe signature aur `exp` check. Database lookup nahi chahiye (stateless). Nuksaan: expiry se pehle revoke karna mushkil, isliye chhoti expiry ya refresh token / denylist.
+27. Password kaise store karoge? Kabhi plain ya simple hash (MD5/SHA) nahi. bcrypt/argon2: salt + slow hashing, taaki leak hone pe brute force mehenga ho.
+28. Bade video upload ka kya? Stream karke disk pe likho (poori file RAM mein nahi), size limit (413), background job mein transcription, status polling, aur production mein S3 + signed URLs aur queue (Celery/Redis).

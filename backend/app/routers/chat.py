@@ -10,12 +10,13 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.agents import graph
+from app.auth import CurrentUser, scope_id
 from app.config import settings
 from app.db import get_db
 from app.ingestion.youtube import fmt_ts
 from app.llm.base import LLMProvider
 from app.llm.factory import get_llm
-from app.models import Video
+from app.models import User, Video
 from app.services import rag
 from app.services.transcripts import ready_video
 
@@ -109,8 +110,8 @@ def resolve(provider: str | None) -> LLMProvider:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-def check_video(session: Session, video_id: int | None) -> Video | None:
-    return ready_video(session, video_id) if video_id is not None else None
+def check_video(session: Session, video_id: int | None, user: User | None) -> Video | None:
+    return ready_video(session, video_id, user) if video_id is not None else None
 
 
 def citations(answer: rag.Answer) -> list[Citation]:
@@ -202,12 +203,19 @@ def sse(data: dict) -> str:
 
 
 @router.post("", response_model=AgentChatResponse)
-def chat(body: ChatRequest, session: DbSession) -> AgentChatResponse:
-    check_video(session, body.video_id)
+def chat(body: ChatRequest, session: DbSession, user: CurrentUser) -> AgentChatResponse:
+    check_video(session, body.video_id, user)
     llm = resolve(body.provider)
     start = time.perf_counter()
     try:
-        state = graph.run(llm, body.question, body.video_id, k=body.k, history=history_of(body))
+        state = graph.run(
+            llm,
+            body.question,
+            body.video_id,
+            k=body.k,
+            history=history_of(body),
+            user_id=scope_id(user),
+        )
     except Exception as e:
         log.exception("agent chat failed with %s", llm.name)
         raise HTTPException(status_code=502, detail=f"{llm.name} call failed: {e}") from e
@@ -215,8 +223,9 @@ def chat(body: ChatRequest, session: DbSession) -> AgentChatResponse:
 
 
 @router.post("/stream")
-def chat_stream(body: ChatRequest, session: DbSession) -> StreamingResponse:
-    check_video(session, body.video_id)
+def chat_stream(body: ChatRequest, session: DbSession, user: CurrentUser) -> StreamingResponse:
+    check_video(session, body.video_id, user)
+    user_id = scope_id(user)
     llm = resolve(body.provider)
 
     def events() -> Iterator[str]:
@@ -224,7 +233,12 @@ def chat_stream(body: ChatRequest, session: DbSession) -> StreamingResponse:
         yield sse({"type": "start", "provider": llm.name, "model": llm.model})
         try:
             for kind, data in graph.stream(
-                llm, body.question, body.video_id, k=body.k, history=history_of(body)
+                llm,
+                body.question,
+                body.video_id,
+                k=body.k,
+                history=history_of(body),
+                user_id=user_id,
             ):
                 if kind == "custom" and "token" in data:
                     yield sse({"type": "token", "text": data["token"]})
@@ -248,8 +262,8 @@ def chat_stream(body: ChatRequest, session: DbSession) -> StreamingResponse:
 
 
 @router.post("/rag", response_model=ChatResponse)
-def chat_rag(body: ChatRequest, session: DbSession) -> ChatResponse:
-    check_video(session, body.video_id)
+def chat_rag(body: ChatRequest, session: DbSession, user: CurrentUser) -> ChatResponse:
+    check_video(session, body.video_id, user)
     llm = resolve(body.provider)
     try:
         answer = rag.ask(
@@ -258,6 +272,7 @@ def chat_rag(body: ChatRequest, session: DbSession) -> ChatResponse:
             body.video_id,
             body.k,
             [m.model_dump() for m in body.history],
+            scope_id(user),
         )
     except Exception as e:
         log.exception("chat failed with %s", llm.name)
@@ -266,8 +281,8 @@ def chat_rag(body: ChatRequest, session: DbSession) -> ChatResponse:
 
 
 @router.post("/compare", response_model=CompareResponse)
-def compare(body: CompareRequest, session: DbSession) -> CompareResponse:
-    video = ready_video(session, body.video_id)
+def compare(body: CompareRequest, session: DbSession, user: CurrentUser) -> CompareResponse:
+    video = ready_video(session, body.video_id, user)
     llm = resolve(body.provider)
     try:
         without = rag.ask_without_rag(llm, body.question, video.title or video.youtube_id)

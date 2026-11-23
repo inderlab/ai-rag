@@ -5,10 +5,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.auth import CurrentUser, scope_id
 from app.config import settings
 from app.db import get_db
 from app.ingestion.youtube import fmt_ts
 from app.models import Video
+from app.services.transcripts import visible_video
 from app.vectorstore.chroma_store import ChromaStore, Hit, get_store
 
 router = APIRouter(tags=["search"])
@@ -80,15 +82,16 @@ def info() -> StoreInfo:
 @router.get("/search", response_model=SearchResponse)
 def search(
     session: DbSession,
+    user: CurrentUser,
     q: Annotated[str, Query(min_length=2, max_length=300)],
     video_id: int | None = None,
     k: Annotated[int, Query(ge=1, le=20)] = settings.SEARCH_K,
 ) -> SearchResponse:
-    if video_id is not None and session.get(Video, video_id) is None:
-        raise HTTPException(status_code=404, detail="Video not found")
+    if video_id is not None:
+        visible_video(session, video_id, user)
     store = store_or_503()
     start = time.perf_counter()
-    hits = store.search(q, video_id=video_id, k=k)
+    hits = store.search(q, video_id=video_id, k=k, user_id=scope_id(user))
     latency = int((time.perf_counter() - start) * 1000)
     videos = {h.video_id: session.get(Video, h.video_id) for h in hits}
     return SearchResponse(

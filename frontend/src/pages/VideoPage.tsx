@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { errorMessage, getVideo, type Video } from "../api/client";
+import { errorMessage, getVideo, mediaSrc, type Video } from "../api/client";
 import ChatPanel from "../components/ChatPanel";
 import InsightsPanel from "../components/InsightsPanel";
+import MediaPlayer from "../components/MediaPlayer";
 import StatusBadge from "../components/StatusBadge";
 import YouTubePlayer, { type PlayerHandle } from "../components/YouTubePlayer";
 
@@ -48,7 +49,11 @@ export default function VideoPage() {
         <Link to="/" className="text-sm text-slate-500 hover:underline">
           ← Library
         </Link>
-        <YouTubePlayer ref={player} videoId={video.youtube_id} start={start} />
+        {video.source === "upload" ? (
+          <MediaPlayer ref={player} src={mediaSrc(video)} start={start} />
+        ) : (
+          <YouTubePlayer ref={player} videoId={video.youtube_id} start={start} />
+        )}
         <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="text-xl font-semibold">{video.title ?? video.youtube_id}</h1>

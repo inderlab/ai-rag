@@ -20,11 +20,25 @@ def utcnow() -> datetime:
     return datetime.now(UTC)
 
 
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+    email: Mapped[str] = mapped_column(String(254), unique=True, index=True)
+    password_hash: Mapped[str] = mapped_column(String(100))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
 class Video(Base):
     __tablename__ = "videos"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), index=True
+    )
     source: Mapped[str] = mapped_column(String(20), default="youtube")
+    file_path: Mapped[str | None] = mapped_column(String(500))
     youtube_id: Mapped[str] = mapped_column(String(11), unique=True, index=True)
     url: Mapped[str] = mapped_column(String(500))
     title: Mapped[str | None] = mapped_column(String(300))

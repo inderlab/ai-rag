@@ -1,8 +1,38 @@
 import axios from "axios";
 
-const BASE = `${import.meta.env.VITE_API_URL ?? ""}/api`;
+const ROOT = import.meta.env.VITE_API_URL ?? "";
+const BASE = `${ROOT}/api`;
+const TOKEN_KEY = "vidmind_token";
+
+export function getToken(): string | null {
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setToken(token: string | null) {
+  try {
+    if (token) localStorage.setItem(TOKEN_KEY, token);
+    else localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    return;
+  }
+}
+
+function authHeaders(): Record<string, string> {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 export const api = axios.create({ baseURL: BASE, timeout: 120_000 });
+
+api.interceptors.request.use((config) => {
+  const token = getToken();
+  if (token) config.headers.set("Authorization", `Bearer ${token}`);
+  return config;
+});
 
 export type Health = { status: string; app: string; llm_provider: string };
 
@@ -31,8 +61,15 @@ export type Provider = {
 
 export type VideoStatus = "pending" | "processing" | "indexing" | "ready" | "failed";
 
+export type User = { id: number; name: string; email: string };
+
+export type TokenResponse = { access_token: string; user: User };
+
 export type Video = {
   id: number;
+  source: "youtube" | "upload";
+  private: boolean;
+  media_url: string | null;
   youtube_id: string;
   url: string;
   title: string | null;
@@ -144,6 +181,35 @@ export const getTranscript = (url: string, limit = 50) =>
 export const testLLM = (prompt: string, provider?: string) =>
   api.post<LLMTestResponse>("/llm/test", { prompt, provider }).then((r) => r.data);
 
+export const getAuthConfig = () =>
+  api.get<{ auth_required: boolean }>("/auth/config").then((r) => r.data);
+
+export const getMe = () => api.get<User>("/auth/me").then((r) => r.data);
+
+export const login = (email: string, password: string) =>
+  api.post<TokenResponse>("/auth/login", { email, password }).then((r) => r.data);
+
+export const register = (name: string, email: string, password: string) =>
+  api.post<TokenResponse>("/auth/register", { name, email, password }).then((r) => r.data);
+
+export const uploadVideo = (file: File, title: string, onProgress?: (percent: number) => void) => {
+  const form = new FormData();
+  form.append("file", file);
+  if (title.trim()) form.append("title", title.trim());
+  return api
+    .post<Video>("/videos/upload", form, {
+      timeout: 0,
+      onUploadProgress: (e) => e.total && onProgress?.(Math.round((e.loaded / e.total) * 100)),
+    })
+    .then((r) => r.data);
+};
+
+export function mediaSrc(video: Video): string {
+  if (!video.media_url) return "";
+  const token = getToken();
+  return `${ROOT}${video.media_url}${token ? `?token=${encodeURIComponent(token)}` : ""}`;
+}
+
 export const getProviders = () => api.get<Provider[]>("/llm/providers").then((r) => r.data);
 
 export const listVideos = () => api.get<Video[]>("/videos").then((r) => r.data);
@@ -175,7 +241,7 @@ export async function streamChat(
 ): Promise<void> {
   const res = await fetch(`${BASE}/chat/stream`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ ...body, provider: body.provider || null }),
     signal,
   });

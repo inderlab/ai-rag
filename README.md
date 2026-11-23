@@ -1,6 +1,6 @@
 # VidMind AI
 
-Chat with any YouTube video. Paste a link, then ask questions in English, Hindi or Hinglish and get answers with clickable `[mm:ss]` timestamps that jump the player to the exact moment.
+Chat with any video. Paste a YouTube link or upload your own file, then ask questions in English, Hindi or Hinglish and get answers with clickable `[mm:ss]` timestamps that jump the player to the exact moment.
 
 ![Library](docs/images/library.png)
 
@@ -11,6 +11,8 @@ Long videos (lectures, talks, tutorials) are hard to search. Generic "chat with 
 ## Features
 
 - **Add a YouTube link** → captions, chunks, vectors and an auto summary are built in the background (status: `pending → processing → indexing → ready`)
+- **Upload a video or audio file** → FFmpeg + `faster-whisper` make the timestamped transcript, then the same pipeline; HTML5 player with seeking
+- **Login** (JWT + bcrypt): uploads are private to their owner, YouTube videos are a shared library; turn on `AUTH_REQUIRED=true` to require login everywhere
 - **RAG chat** with `[mm:ss]` citations that seek the player, streamed token by token (SSE)
 - **Multi-agent graph** (LangGraph): router → retriever / library search / summarizer / quiz → answer → **citation verifier** with one retry
 - **Query rewriting** for Hinglish questions (Hit@6 96% → 100% in the eval)
@@ -47,7 +49,8 @@ More detail in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 | Layer | Tools |
 |---|---|
-| Backend | Python, FastAPI, Pydantic, SQLAlchemy + SQLite, BackgroundTasks, SSE |
+| Backend | Python, FastAPI, Pydantic, SQLAlchemy + SQLite, BackgroundTasks, SSE, JWT auth |
+| Speech | FFmpeg, `faster-whisper` (local, CPU, multilingual) |
 | AI | Claude (`claude-haiku-5-5`) and OpenAI behind one provider interface, structured outputs, tool calling, LangGraph |
 | Retrieval | `intfloat/multilingual-e5-small` (384 dims, local, Hindi + English), ChromaDB (cosine, HNSW) |
 | Frontend | React 18, TypeScript, Vite, Tailwind, YouTube IFrame API |
@@ -105,13 +108,16 @@ cd ../frontend
 npm install && npm run dev                # http://localhost:5173
 ```
 
-Tests: `cd backend && pytest -q` (130 tests, no API key or model download needed).
+Tests: `cd backend && pytest -q` (145 tests, no API key or model download needed). FFmpeg is needed for uploads (`brew install ffmpeg`).
 
 ## API
 
 | Method | Path | What |
 |---|---|---|
+| POST | `/api/auth/register`, `/api/auth/login`, GET `/api/auth/me` | JWT auth |
 | POST | `/api/videos` | Add a YouTube URL (202, background job) |
+| POST | `/api/videos/upload` | Upload a video/audio file (multipart, 202) |
+| GET | `/api/videos/{id}/media` | Stream an uploaded file (supports Range for seeking) |
 | GET | `/api/videos`, `/api/videos/{id}` | List / get videos with status |
 | POST | `/api/videos/{id}/retry`, `/reindex` | Retry a failed video, rebuild vectors |
 | GET | `/api/videos/{id}/transcript` | Paged transcript with keyword filter |
@@ -142,9 +148,11 @@ vidmind-ai/
 └── docs/         Architecture, notes, tracker, changelog, plans
 ```
 
-## Notes on YouTube
+## Notes on YouTube and uploads
 
-VidMind uses public captions through `youtube-transcript-api` and does not download video or audio. Videos without captions fail with a clear message.
+VidMind uses public captions through `youtube-transcript-api` and does not download YouTube video or audio. Videos without captions fail with a clear message; for your own videos, upload the file instead and Whisper transcribes it.
+
+![Login](docs/images/login.png)
 
 ## Docs
 

@@ -33,6 +33,8 @@ Payload sent by the backend:
 
 Reads the channel's public RSS feed (`https://www.youtube.com/feeds/videos.xml?channel_id=...`) and adds every video published in the last 6 hours to VidMind. When it is ready, workflow 1 sends the Telegram message.
 
+If the backend runs with `AUTH_REQUIRED=true`, add a header `Authorization: Bearer <token>` to the **Add to VidMind** node (token from `POST /api/auth/login`).
+
 Edit the **Config** node: `channel_id`, `api_url` (`http://host.docker.internal:8000/api` when n8n runs in Docker, `http://localhost:8000/api` otherwise) and `hours`.
 
 ## Run n8n locally

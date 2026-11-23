@@ -2,15 +2,21 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.auth import can_see
 from app.config import settings
 from app.ingestion.chunker import Chunk, chunk_segments
-from app.models import TranscriptSegment, Video, VideoStatus
+from app.models import TranscriptSegment, User, Video, VideoStatus
 
 
-def ready_video(session: Session, video_id: int) -> Video:
+def visible_video(session: Session, video_id: int, user: User | None) -> Video:
     video = session.get(Video, video_id)
-    if video is None:
+    if video is None or not can_see(video, user):
         raise HTTPException(status_code=404, detail="Video not found")
+    return video
+
+
+def ready_video(session: Session, video_id: int, user: User | None = None) -> Video:
+    video = visible_video(session, video_id, user)
     if video.status != VideoStatus.READY:
         raise HTTPException(
             status_code=409, detail=f"Transcript not ready, video status is '{video.status}'"
