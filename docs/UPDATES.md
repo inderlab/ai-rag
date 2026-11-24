@@ -5,6 +5,17 @@ Format: `## [version] - YYYY-MM-DD` with **Added / Changed / Fixed / Removed**.
 
 ---
 
+## [1.1.1] - 2026-11-24
+
+### Added
+- `docs/INTERVIEW_PREP.md`: final self-test with the 9 topics, project numbers and a 30 second pitch
+- `docs/LAUNCH.md`: 2 minute demo script, deploy steps, LinkedIn post, resume bullets
+
+### Fixed
+- Search results for uploaded videos linked to a fake YouTube URL; they now link to `/videos/{id}?t=` in the app
+
+---
+
 ## [1.1.0] - 2026-11-23
 
 ### Added

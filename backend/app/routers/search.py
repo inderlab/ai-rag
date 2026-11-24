@@ -55,8 +55,16 @@ def store_or_503() -> ChromaStore:
         raise HTTPException(status_code=503, detail=f"Vector store unavailable: {e}") from e
 
 
+def moment_url(video: Video | None, video_id: int, start: float) -> str:
+    seconds = int(start)
+    if video is not None and video.source == "upload":
+        return f"{settings.PUBLIC_APP_URL}/videos/{video_id}?t={seconds}"
+    if video is None or not video.youtube_id:
+        return ""
+    return f"https://www.youtube.com/watch?v={video.youtube_id}&t={seconds}s"
+
+
 def to_search_hit(rank: int, hit: Hit, video: Video | None) -> SearchHit:
-    youtube_id = video.youtube_id if video else ""
     return SearchHit(
         rank=rank,
         video_id=hit.video_id,
@@ -66,9 +74,7 @@ def to_search_hit(rank: int, hit: Hit, video: Video | None) -> SearchHit:
         end=hit.end,
         timestamp=fmt_ts(hit.start),
         end_timestamp=fmt_ts(hit.end),
-        url=f"https://www.youtube.com/watch?v={youtube_id}&t={int(hit.start)}s"
-        if youtube_id
-        else "",
+        url=moment_url(video, hit.video_id, hit.start),
         score=hit.score,
         text=hit.text,
     )

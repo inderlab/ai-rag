@@ -21,8 +21,9 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 | 11 | 2026-11-22 | React + Vite | Library (status, search, library chat), video page (player, chapters, streaming chat, quiz), model dropdown | ✅ | 1 | |
 | 12 | 2026-11-22 | MCP | `mcp_server/server.py` (5 tools over the API), stdio + HTTP, tests, Claude Desktop config | ✅ | 1 | |
 | 13 | 2026-11-22 | Eval + n8n | `eval/run_eval.py` + 28 questions, n8n webhook + 2 workflows | ✅ | 1 | |
-| 14 | 2026-11-22 | Docker + CI + launch | Dockerfiles, compose, CI (lint, tests, build, docker build), README, changelog | 🔄 | 1 | |
+| 14 | 2026-11-22 | Docker + CI + launch | Dockerfiles, compose, CI (lint, tests, build, docker build), README, changelog, launch kit, interview prep | ✅ | 2 | |
 | + | 2026-11-23 | Auth + uploads (Day 11 leftovers) | JWT login, private uploads, FFmpeg + faster-whisper, media streaming, login page, upload box | ✅ | 1 | |
+| + | 2026-11-24 | Final self-test + launch kit | `docs/INTERVIEW_PREP.md` (9 topics), `docs/LAUNCH.md` (demo script, deploy, LinkedIn, resume), upload search link fix | ✅ | 1 | |
 
 ## Daily log
 
@@ -138,6 +139,12 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 - **Problems / how I solved them:** faster-whisper broke with PyAV 19, so FFmpeg decodes audio; screenshot showed a private upload to an anonymous visitor, fixed and tested; Chroma chunks without `user_id` are backfilled
 - **Result:** 145 tests; live: 401 without token, upload transcribed in 19 s, verified Hinglish answer, Range 206
 
+### Extra — 2026-11-24 (Day 14 wrap-up)
+- **Learned:** how to explain each topic in 2 minutes with my own numbers; deploy on a VM with Caddy for HTTPS
+- **Built:** `docs/INTERVIEW_PREP.md` (final self-test, 9 topics + 30 second pitch), `docs/LAUNCH.md` (2 minute demo script, deploy steps, LinkedIn post, resume bullets, checklist)
+- **Problems / how I solved them:** search results gave uploaded videos a fake YouTube link (`watch?v=u...`); uploads now link to the app page `/videos/{id}?t=`, with a test
+- **Still to do by me:** record demo, deploy, post, resume (checklist in `docs/LAUNCH.md`)
+
 ## Eval results (fill on Day 13)
 
 28 questions on the 1 hour LLM talk, full tables in `eval/README.md`.
@@ -152,4 +159,4 @@ Legend: ✅ done · 🔄 in progress · ⬜ not started · ⏸️ blocked
 
 ## Bugs / TODO
 
-- [ ]
+- [x] Search hits for uploads linked to a fake YouTube URL (fixed 2026-11-24)

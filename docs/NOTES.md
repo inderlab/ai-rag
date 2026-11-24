@@ -149,6 +149,12 @@ Write each concept in my own words after learning it. If I can't explain it here
 - My test (live, login required): bina token 401; `say` se bani 21 s ki MP4 upload; 19 s mein ready, 7 segments, language en; Hinglish sawaal "Data restart ke baad kaise bachega?" → volumes wala sahi jawab, verified; media pe Range request → 206 (seek kaam karta hai).
 - Chhoti clip (21 s) ek hi chunk hai, isliye citation `[00:00]` aaya, `[00:17]` nahi. Lambi video mein chunk chhote hisse hote hain.
 
+## Extra (2026-11-24) — Final self-test + launch
+- Final self-test ke 9 topics ki 2 minute wali sheet `docs/INTERVIEW_PREP.md` mein hai. Har jawab mein VidMind ka asli number hai (82% Hit@1, 96% → 100% rewrite, 93-96% citation), kyunki "maine naapa" bolna "maine padha" se zyada strong hai.
+- Bug pakda: search result ka `url` hamesha YouTube link banata tha, upload ke liye `youtube.com/watch?v=u3f9...` jaisa nakli link aata (MCP tool bhi yahi dikhata). Ab `source == "upload"` pe app ka link `/videos/{id}?t=<seconds>` aata hai, aur video page `?t=` se seek karta hai.
+- Lesson: placeholder values (`youtube_id = "u..."`) kabhi na kabhi kisi aur jagah leak hote hain. Har jagah jahan value use hoti hai, `source` check karo, ya placeholder ki jagah `None` rakho.
+- Deploy ka simple raasta: ek VM + `docker compose up -d` + Caddy (HTTPS khud). Public URL pe `AUTH_REQUIRED=true` zaroor, warna koi bhi meri API key kharch kar sakta hai.
+
 ## Interview answers (practice)
 1. Why ChromaDB? Local, free, Python se seedha chalta hai, disk pe save hota hai (PersistentClient), metadata filter (`where`) deta hai. Is size ke project ke liye alag server nahi chahiye. Scale badhe to pgvector ya Qdrant pe ja sakte hain, kyunki store ek wrapper (`chroma_store.py`) ke peeche hai.
 2. Why chunk overlap? Chunk ki seema pe koi baat aadhi ek chunk mein aur aadhi agle mein chali jaati hai. Overlap se wo baat kam se kam ek chunk mein poori rehti hai. Kharcha: thoda zyada storage aur embedding.
@@ -178,3 +184,5 @@ Write each concept in my own words after learning it. If I can't explain it here
 26. JWT kaise kaam karta hai? Header.payload.signature. Server secret se sign karta hai; har request pe signature aur `exp` check. Database lookup nahi chahiye (stateless). Nuksaan: expiry se pehle revoke karna mushkil, isliye chhoti expiry ya refresh token / denylist.
 27. Password kaise store karoge? Kabhi plain ya simple hash (MD5/SHA) nahi. bcrypt/argon2: salt + slow hashing, taaki leak hone pe brute force mehenga ho.
 28. Bade video upload ka kya? Stream karke disk pe likho (poori file RAM mein nahi), size limit (413), background job mein transcription, status polling, aur production mein S3 + signed URLs aur queue (Celery/Redis).
+29. Apna project 30 second mein samjhao? Problem (lambi video mein baat dhoondhna), solution (transcript pe RAG, timestamp citations, Hinglish), kaise (LangGraph graph + verifier), saboot (eval numbers), stack. Poora pitch `docs/INTERVIEW_PREP.md` ke end mein.
+30. AI app ko public deploy karte waqt kya dhyan rakhoge? API key sirf server pe, login ya rate limit (warna bill aapka), HTTPS, strong JWT secret, upload size limit, logs mein secrets nahi, aur health check + restart policy.

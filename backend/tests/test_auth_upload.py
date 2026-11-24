@@ -176,6 +176,11 @@ def test_uploads_are_private(client):
     alice_search = client.get("/api/search", params={"q": "docker lesson"}, headers=alice).json()
     bob_search = client.get("/api/search", params={"q": "docker lesson"}, headers=bob).json()
     assert mine in {h["video_id"] for h in alice_search["results"]}
+    upload_hit = next(h for h in alice_search["results"] if h["video_id"] == mine)
+    assert upload_hit["url"].startswith(f"http://localhost:5173/videos/{mine}?t=")
+    assert "youtube.com" not in upload_hit["url"]
+    public_hit = next(h for h in alice_search["results"] if h["video_id"] == public)
+    assert public_hit["url"].startswith("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=")
     assert mine not in {h["video_id"] for h in bob_search["results"]}
     assert public in {h["video_id"] for h in bob_search["results"]}
 

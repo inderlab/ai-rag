@@ -165,6 +165,8 @@ VidMind uses public captions through `youtube-transcript-api` and does not downl
 | [RULES.md](docs/RULES.md) | Coding conventions and git rules |
 | [COMMANDS.md](docs/COMMANDS.md) | Every command you need |
 | [LEARNING_PLAN.md](docs/LEARNING_PLAN.md) | 14-day learning plan |
+| [INTERVIEW_PREP.md](docs/INTERVIEW_PREP.md) | Final self-test: 9 topics with project numbers |
+| [LAUNCH.md](docs/LAUNCH.md) | Demo script, deploy steps, LinkedIn post, resume bullets |
 
 ## Author
 

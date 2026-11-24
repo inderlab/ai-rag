@@ -296,19 +296,19 @@ Agar ye 9 cheezein aap 2–2 minute mein samjha sakte ho, to RAG/AI wale intervi
 
 | Day | Topic | Done | Commit | Notes |
 |---|---|---|---|---|
-| 1 | LLM basics + API | ☐ | | |
-| 2 | Prompting + provider layer | ☐ | | |
-| 3 | Transcript + Whisper | ☐ | | |
-| 4 | Embeddings | ☐ | | |
-| 5 | Chunking | ☐ | | |
-| 6 | Vector DB (ChromaDB) | ☐ | | |
-| 7 | RAG | ☐ | | |
-| 8 | Structured outputs + tools | ☐ | | |
-| 9 | Agents + LangGraph | ☐ | | |
-| 10 | Multi-agent + verifier | ☐ | | |
-| 11 | React + Vite frontend | ☐ | | |
-| 12 | MCP | ☐ | | |
-| 13 | Eval + n8n | ☐ | | |
-| 14 | Docker, CI, launch | ☐ | | |
+| 1 | LLM basics + API | ✅ | | |
+| 2 | Prompting + provider layer | ✅ | | |
+| 3 | Transcript + Whisper | ✅ | | |
+| 4 | Embeddings | ✅ | | |
+| 5 | Chunking | ✅ | | |
+| 6 | Vector DB (ChromaDB) | ✅ | | |
+| 7 | RAG | ✅ | | |
+| 8 | Structured outputs + tools | ✅ | | |
+| 9 | Agents + LangGraph | ✅ | | |
+| 10 | Multi-agent + verifier | ✅ | | |
+| 11 | React + Vite frontend | ✅ | | |
+| 12 | MCP | ✅ | | |
+| 13 | Eval + n8n | ✅ | | |
+| 14 | Docker, CI, launch | ✅ | | |
 
 **Tip:** roz ke `NOTES.md` ko apne Instagram/LinkedIn par "Day X of building an AI project" post ki tarah share karo — seekhna bhi pakka hoga aur profile bhi banega.
